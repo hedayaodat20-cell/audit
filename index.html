@@ -1505,27 +1505,282 @@ tr:hover td{
     }
 }
 
+/* ================================
+   واجهة تسجيل الدخول الجديدة
+================================ */
+
+.audit-login-screen{
+    position:fixed;
+    inset:0;
+    z-index:99999;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:20px;
+
+    background:
+        radial-gradient(circle at 75% 25%, rgba(35,190,255,.18), transparent 28%),
+        radial-gradient(circle at 20% 80%, rgba(30,90,220,.18), transparent 30%),
+        linear-gradient(135deg,#020814,#071b3b 55%,#063b52);
+
+    font-family:"Cairo",Arial,sans-serif;
+}
+
+.audit-login-card{
+    width:min(520px,100%);
+    padding:42px 42px 30px;
+
+    border-radius:42px;
+
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(130,220,255,.28);
+
+    backdrop-filter:blur(25px);
+    -webkit-backdrop-filter:blur(25px);
+
+    box-shadow:
+        0 30px 80px rgba(0,0,0,.45),
+        inset 0 1px 0 rgba(255,255,255,.12);
+
+    color:white;
+}
+
+/* الأيقونة - حجم متوسط */
+.audit-login-icon{
+    width:100px;
+    height:100px;
+
+    margin:0 auto 22px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:50%;
+
+    color:#67e5ff;
+
+    background:rgba(35,190,225,.08);
+
+    border:2px solid rgba(80,220,255,.8);
+
+    box-shadow:
+        0 0 0 9px rgba(55,201,255,.05),
+        0 0 32px rgba(40,203,255,.20);
+}
+
+.audit-login-icon svg{
+    width:48px;
+    height:48px;
+}
+
+.audit-login-title{
+    text-align:center;
+    margin-bottom:28px;
+}
+
+.audit-login-title h1{
+    margin:0 0 7px;
+    font-size:28px;
+    font-weight:800;
+}
+
+.audit-login-title p{
+    margin:0;
+    color:#a9bfd2;
+    font-size:12px;
+}
+
+.audit-login-field{
+    height:70px;
+
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    margin-bottom:14px;
+    padding:0 20px;
+
+    border-radius:22px;
+
+    background:rgba(3,25,51,.55);
+    border:1px solid rgba(130,208,255,.25);
+
+    transition:.2s;
+}
+
+.audit-login-field:focus-within{
+    border-color:rgba(80,220,255,.75);
+
+    box-shadow:
+        0 0 0 3px rgba(55,211,255,.08),
+        0 0 25px rgba(38,180,255,.10);
+}
+
+.audit-login-field svg{
+    width:25px;
+    height:25px;
+    color:#67d7ee;
+    flex-shrink:0;
+}
+
+.audit-login-field input{
+    width:100%;
+
+    border:0;
+    outline:0;
+
+    background:transparent;
+
+    color:white;
+
+    font-family:"Cairo",Arial,sans-serif;
+    font-size:14px;
+
+    text-align:right;
+}
+
+.audit-login-field input::placeholder{
+    color:#7891a9;
+}
+
+.audit-login-options{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    margin:14px 4px 22px;
+
+    color:#aabbd0;
+    font-size:11px;
+}
+
+.audit-login-options label{
+    display:flex;
+    align-items:center;
+    gap:7px;
+}
+
+.audit-login-options input{
+    accent-color:#2e8be6;
+}
+
+.audit-login-button{
+    width:100%;
+    height:70px;
+
+    border:0;
+    border-radius:22px;
+
+    background:linear-gradient(135deg,#1184b7,#21c4d8);
+
+    color:white;
+
+    font-family:"Cairo",Arial,sans-serif;
+    font-size:18px;
+    font-weight:800;
+
+    cursor:pointer;
+
+    box-shadow:
+        0 15px 35px rgba(0,148,210,.25);
+
+    transition:.2s;
+}
+
+.audit-login-button:hover{
+    transform:translateY(-2px);
+    filter:brightness(1.08);
+}
+
+.audit-login-footer{
+    text-align:center;
+
+    margin-top:25px;
+    padding-top:20px;
+
+    border-top:1px solid rgba(255,255,255,.12);
+
+    color:#8ca2b8;
+    font-size:10px;
+}
+
+@media(max-width:600px){
+
+    .audit-login-card{
+        padding:34px 22px 25px;
+        border-radius:34px;
+    }
+
+    .audit-login-icon{
+        width:90px;
+        height:90px;
+    }
+
+    .audit-login-icon svg{
+        width:44px;
+        height:44px;
+    }
+
+    .audit-login-title h1{
+        font-size:24px;
+    }
+
+    .audit-login-field{
+        height:64px;
+    }
+
+    .audit-login-button{
+        height:64px;
+    }
+}
+
+/* ===== ISOLATED AUDIT LOGIN ===== */
+#auditLoginLayer{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;margin:0!important;padding:20px!important;box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;background:radial-gradient(circle at 75% 25%,rgba(35,190,255,.18),transparent 28%),radial-gradient(circle at 20% 80%,rgba(30,90,220,.18),transparent 30%),linear-gradient(135deg,#020814,#071b3b 55%,#063b52);z-index:2147483647!important;font-family:"Cairo",Arial,sans-serif;direction:rtl;transition:opacity .35s,visibility .35s}
+#auditLoginLayer.auditLoginHidden{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+#auditLoginCard{width:520px;max-width:100%;padding:42px;box-sizing:border-box;border-radius:40px;background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.045));border:1px solid rgba(130,220,255,.28);box-shadow:0 30px 80px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.12);backdrop-filter:blur(25px);-webkit-backdrop-filter:blur(25px);color:#fff}
+#auditLoginIcon{width:100px;height:100px;margin:0 auto 22px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:#67e5ff;background:rgba(35,190,225,.08);border:2px solid rgba(80,220,255,.8);box-shadow:0 0 0 9px rgba(55,201,255,.05),0 0 32px rgba(40,203,255,.20);box-sizing:border-box}
+#auditLoginIcon svg{width:48px;height:48px}
+#auditLoginTitle{text-align:center;margin-bottom:28px}
+#auditLoginTitle h1{margin:0 0 8px;color:#fff;font-size:28px;font-weight:800;line-height:1.4}
+#auditLoginTitle p{margin:0;color:#a9bfd2;font-size:12px;line-height:1.8}
+.auditLoginField{width:100%;height:68px;display:flex;align-items:center;margin-bottom:14px;padding:0 20px;box-sizing:border-box;border-radius:20px;background:rgba(3,25,51,.55);border:1px solid rgba(130,208,255,.25)}
+.auditLoginField:focus-within{border-color:rgba(80,220,255,.75);box-shadow:0 0 0 3px rgba(55,211,255,.08)}
+.auditLoginFieldIcon{width:24px;height:24px;margin-left:12px;flex-shrink:0;color:#67d7ee}
+.auditLoginField input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:#fff;font-family:"Cairo",Arial,sans-serif;font-size:14px;text-align:right}
+#auditLoginOptions{display:flex;align-items:center;justify-content:space-between;margin:12px 4px 22px;color:#aabbd0;font-size:11px}
+#auditLoginRemember{display:flex;align-items:center;gap:7px;cursor:pointer}
+#auditLoginRemember input{accent-color:#2e8be6}
+#auditLoginButton{width:100%;height:68px;border:0;border-radius:20px;background:linear-gradient(135deg,#1184b7,#21c4d8);color:#fff;font-family:"Cairo",Arial,sans-serif;font-size:17px;font-weight:800;cursor:pointer;box-shadow:0 15px 35px rgba(0,148,210,.25);transition:.2s}
+#auditLoginButton:hover{transform:translateY(-2px);filter:brightness(1.08)}
+#auditLoginFooter{margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,.12);text-align:center;color:#8ca2b8;font-size:10px}
+@media(max-width:600px){#auditLoginLayer{padding:14px!important}#auditLoginCard{width:100%;padding:32px 22px;border-radius:32px}#auditLoginIcon{width:90px;height:90px}#auditLoginIcon svg{width:44px;height:44px}#auditLoginTitle h1{font-size:24px}.auditLoginField{height:64px}#auditLoginButton{height:64px}}
 </style>
+
 </head>
 
 <body>
-
-<!-- =========================================================
-     BACKGROUND
-========================================================= -->
-
-<div class="background">
-    <div class="grid"></div>
-    <div class="orb one"></div>
-    <div class="orb two"></div>
-    <div class="orb three"></div>
-    <div class="orb four"></div>
-</div>
-
+    
 
 <!-- =========================================================
      APP
 ========================================================= -->
+
+
+<!-- ===== LOGIN LAYER (OUTSIDE .app) ===== -->
+<div id="auditLoginLayer">
+  <div id="auditLoginCard">
+    <div id="auditLoginIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3.2 19 6v5.5c0 4.25-2.7 7.75-7 9.3-4.3-1.55-7-5.05-7-9.3V6l7-2.8Z"/><path d="m9.2 12 1.9 1.9 3.9-4"/></svg></div>
+    <div id="auditLoginTitle"><h1>بوابة التدقيق الإلكترونية</h1><p>يمكنك رفع مستنداتك المطلوبة ومتابعة تقدمك</p></div>
+    <div class="auditLoginField"><svg class="auditLoginFieldIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="7.5" r="3.5"/><path d="M5 21v-2.5a7 7 0 0 1 14 0V21"/></svg><input id="auditLoginUsername" type="email" value="audit company@gmail.com" placeholder="اسم المستخدم" autocomplete="username"></div>
+    <div class="auditLoginField"><svg class="auditLoginFieldIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><input id="auditLoginPassword" type="password" value="12345678" placeholder="كلمة المرور" autocomplete="current-password"></div>
+    <div id="auditLoginOptions"><label id="auditLoginRemember"><input type="checkbox" checked><span>تذكرني</span></label><span>نسيت كلمة المرور؟</span></div>
+    <button id="auditLoginButton" type="button">تسجيل الدخول</button>
+    <div id="auditLoginFooter">منظومة التدقيق المالي المعتمدة · تشفير عالي الأمان</div>
+  </div>
+</div>
 
 <div class="app">
 
@@ -4209,7 +4464,7 @@ function renderWorkspace(){
 
                     <p>
                         ${escapeHTML(engagement.id)}
-                        ·
+                        •
                         ${escapeHTML(engagement.year || "—")}
                     </p>
 
@@ -6617,6 +6872,14 @@ renderNotifications();
 
 navigate("dashboard");
 
+
+/* ===== LOGIN BUTTON ===== */
+document.addEventListener("DOMContentLoaded",function(){
+  const layer=document.getElementById("auditLoginLayer");
+  const button=document.getElementById("auditLoginButton");
+  if(!layer||!button)return;
+  button.addEventListener("click",function(){layer.classList.add("auditLoginHidden");});
+});
 </script>
 
 </body>
