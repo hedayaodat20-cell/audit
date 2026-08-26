@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة التدقيق الإلكترونية</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800;900&display=swap');
+        * {
+            font-family: 'Tajawal', sans-serif;
+        }
+        body {
+            background:
+                radial-gradient(circle at 15% 20%, rgba(0, 180, 216, 0.14), transparent 25%),
+                radial-gradient(circle at 85% 75%, rgba(0, 129, 167, 0.18), transparent 30%),
+                linear-gradient(135deg, #020617 0%, #03254c 35%, #004b6e 70%, #0081a7 100%);
+            background-attachment: fixed;
+            color: #f8fafc;
+            min-height: 100vh;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow:
+                0 12px 40px rgba(0, 0, 0, 0.37),
+                inset 0 0 15px rgba(255, 255, 255, 0.05);
+        }
+        .glass-panel-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-panel-hover:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.13);
+            border-color: rgba(56, 189, 248, 0.4);
+            box-shadow:
+                0 15px 45px rgba(0, 168, 232, 0.25),
+                inset 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+        .glass-input {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        .glass-input:focus {
+            outline: none;
+            border-color: #38bdf8;
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+        }
+        .aqua-glow-btn {
+            background: linear-gradient(135deg, #0077b6 0%, #00b4d8 100%);
+            box-shadow: 0 8px 25px -4px rgba(0, 180, 216, 0.5);
+            transition: all 0.3s ease;
+        }
+        .aqua-glow-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px -4px rgba(0, 180, 216, 0.7);
+            background: linear-gradient(135deg, #0096c7 0%, #48cae4 100%);
+        }
+        .glass-menu-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            transition: all 0.25s ease;
+        }
+        .glass-menu-item:hover {
+            background: rgba(56, 189, 248, 0.12);
+            border-color: rgba(56, 189, 248, 0.35);
+        }
+        .drop-active {
+            border-color: #22d3ee !important;
+            background: rgba(34, 211, 238, 0.12) !important;
+            transform: scale(1.01);
+        }
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            z-index: 100;
+            transform: translateY(130px);
+            opacity: 0;
+            transition: all 0.35s ease;
+            pointer-events: none;
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(56, 189, 248, 0.4);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen">
+<div id="app">
+    <!-- =========================
+         SCREEN 1: LOGIN
+    ========================== -->
+    <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-600/30 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="glass-panel rounded-[2.5rem] p-8 sm:p-10 max-w-md w-full relative z-10 text-center">
+            <div class="relative w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+                <div class="absolute inset-0 rounded-full border-2 border-cyan-400/40 animate-pulse"></div>
+                <div class="w-20 h-20 rounded-full border-2 border-cyan-400 flex items-center justify-center bg-cyan-500/10 text-cyan-300 shadow-[0_0_25px_rgba(56,189,248,0.4)]">
+                    <i data-lucide="shield-check" class="w-10 h-10"></i>
+                </div>
+            </div>
+            <h1 class="text-2xl font-black text-white tracking-wide mb-1">
+                بوابة التدقيق الإلكترونية
+            </h1>
+            <p class="text-xs text-cyan-200/70 mb-8">
+                إرفاق ومتابعة المستندات والتواصل مع فريق التدقيق
+            </p>
+            <form onsubmit="handleLogin(event)" class="space-y-4 text-right">
+                <div class="relative">
+                    <i data-lucide="user" class="w-5 h-5 absolute right-4 top-1/2 -translate-y-1/2 text-cyan-300/70"></i>
+                    <input
+                        type="text"
+                        required
+                        value="clientcompany@gmail.com"
+                        class="w-full glass-input pr-12 pl-4 py-3.5 rounded-2xl text-sm"
+                        placeholder="اسم المستخدم"
+                    >
+                </div>
+                <div class="relative">
+                    <i data-lucide="lock" class="w-5 h-5 absolute right-4 top-1/2 -translate-y-1/2 text-cyan-300/70"></i>
+                    <input
+                        type="password"
+                        required
+                        value="12345678"
+                        class="w-full glass-input pr-12 pl-4 py-3.5 rounded-2xl text-sm"
+                        placeholder="كلمة المرور"
+                    >
+                </div>
+                <div class="flex items-center justify-between text-xs text-cyan-200/80 px-1">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked>
+                        <span>تذكرني</span>
+                    </label>
+                    <button type="button" class="hover:text-cyan-300">
+                        نسيت كلمة المرور؟
+                    </button>
+                </div>
+                <button
+                    type="submit"
+                    class="w-full py-4 aqua-glow-btn text-white font-bold rounded-2xl flex items-center justify-center gap-2 text-base"
+                >
+                    <span>دخول البوابة</span>
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                </button>
+            </form>
+            <div class="mt-8 pt-4 border-t border-white/10 text-[11px] text-cyan-200/50">
+                منظومة تدقيق رقمية آمنة • متابعة المستندات والطلبات
+            </div>
+        </div>
+    </div>
+    <!-- =========================
+         SCREEN 2: CLIENT PORTAL
+    ========================== -->
+    <div id="portalScreen" class="hidden min-h-screen flex flex-col">
+        <!-- HEADER -->
+        <header class="glass-panel sticky top-0 z-40 px-4 sm:px-8 py-4 border-b border-white/10">
+            <div class="max-w-7xl mx-auto flex justify-between items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shadow-lg shadow-cyan-500/20">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-black text-white text-lg leading-tight">
+                            بوابة التدقيق الإلكترونية
+                        </h1>
+                        <p class="text-xs font-semibold text-cyan-300/80">
+                            لوحة العميل الرقمية
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="hidden sm:flex items-center gap-3 bg-white/10 border border-white/15 px-4 py-1.5 rounded-2xl">
+                        <div class="w-8 h-8 rounded-full bg-cyan-500 text-slate-950 flex items-center justify-center font-black text-xs">
+                        </div>
+                        <div>
+                            <span class="font-bold text-sm text-white block">
+                                شركة العميل
+                            </span>
+                            <span class="text-[10px] text-cyan-200/60">
+                                الملف المالي 2026
+                            </span>
+                        </div>
+                    </div>
+                    <button
+                        onclick="handleLogout()"
+                        class="p-2.5 rounded-2xl text-cyan-200/70 hover:text-red-400 hover:bg-white/10 transition"
+                        title="تسجيل الخروج"
+                    >
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+        <!-- MAIN -->
+        <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-8 py-8 space-y-8">
+            <!-- WELCOME -->
+            <section class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+                <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-cyan-500/10 blur-3xl rounded-full"></div>
+                <div class="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/20 text-cyan-200 text-[11px] mb-4">
+                            <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                            عملية التدقيق قيد التنفيذ
+                        </div>
+                        <h2 class="text-2xl sm:text-3xl font-black text-white mb-2">
+                            مرحبًا بك  
+                        </h2>
+                        <p class="text-sm text-cyan-200/70 max-w-2xl leading-relaxed">
+                            يمكنك من خلال هذه البوابة متابعة طلبات فريق التدقيق،
+                            رفع المستندات المطلوبة، ومعرفة حالة كل مستند بشكل مباشر.
+                        </p>
+                    </div>                  
+                    <div class="w-full lg:w-72">
+                        <div class="flex justify-between text-xs text-cyan-200/70 mb-2">
+                            <span>نسبة الإنجاز</span>
+                            <span id="progressPercent" class="font-bold text-cyan-300">0%</span>
+                        </div>
+                        <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                            <div
+                                id="progressBar"
+                                class="h-full rounded-full bg-gradient-to-l from-cyan-300 to-blue-500 transition-all duration-500"
+                                style="width:0%"
+                            ></div>
+                        </div>
+                        <p id="progressText" class="text-[10px] text-cyan-200/50 mt-2 text-left"></p>
+                    </div>
+                </div>
+            </section>
+            <!-- STATS -->
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="glass-panel glass-panel-hover rounded-3xl p-6 flex flex-col justify-between min-h-44">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-cyan-200/80 text-xs font-semibold mb-1">
+                                المستندات المقبولة
+                            </p>
+                            <h3 id="statAcceptedCount" class="text-3xl font-black text-emerald-300">
+                                00
+                            </h3>
+                        </div>
+                        <div class="w-12 h-12 bg-emerald-500/20 border border-emerald-400/30 rounded-2xl flex items-center justify-center text-emerald-300">
+                            <i data-lucide="circle-check-big" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                    <div class="text-xs text-cyan-200/70">
+                        تمت مراجعتها وقبولها
+                    </div>
+                </div>
+                <div class="glass-panel glass-panel-hover rounded-3xl p-6 flex flex-col justify-between min-h-44">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-cyan-200/80 text-xs font-semibold mb-1">
+                                تم الرفع / قيد المراجعة
+                            </p>
+                            <h3 id="statReviewCount" class="text-3xl font-black text-yellow-300">
+                                00
+                            </h3>
+                        </div>
+                        <div class="w-12 h-12 bg-yellow-500/20 border border-yellow-400/30 rounded-2xl flex items-center justify-center text-yellow-300">
+                            <i data-lucide="clock-3" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                    <div class="text-xs text-cyan-200/70">
+                        بانتظار مراجعة فريق التدقيق
+                    </div>
+                </div>
+                <div class="glass-panel glass-panel-hover rounded-3xl p-6 flex flex-col justify-between min-h-44">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-bold text-cyan-300 mb-1">
+                                المطلوب منك
+                            </p>
+                            <h3 id="statRequiredCount" class="text-3xl font-black text-red-300">
+                                00
+                            </h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-red-500/20 border border-red-400/30 text-red-300 flex items-center justify-center">
+                            <i data-lucide="clipboard-list" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                    <a
+                        href="#requestsSection"
+                        class="w-full py-2.5 aqua-glow-btn text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-2"
+                    >
+                        <span>عرض طلبات المستندات</span>
+                        <i data-lucide="arrow-down" class="w-4 h-4"></i>
+                    </a>
+                </div>
+            </section>
+            <!-- =========================
+                 DOCUMENT REQUESTS
+            ========================== -->
+            <section id="requestsSection" class="glass-panel rounded-3xl p-6 sm:p-8">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 mb-8 pb-5 border-b border-white/10">
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-2xl bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 flex items-center justify-center">
+                            <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-black text-white">
+                                طلبات المستندات
+                            </h2>
+                            <p class="text-xs text-cyan-200/70 mt-1">
+                                هذه هي المستندات المطلوبة منك لاستكمال إجراءات التدقيق
+                            </p>
+                        </div>
+                    </div>
+                    <div class="bg-black/20 border border-white/10 px-4 py-2.5 rounded-2xl">
+                        <p class="text-[10px] text-cyan-200/50 mb-1">
+                            حالة الإنجاز
+                        </p>
+                        <span id="requestsProgress" class="text-xs font-bold text-cyan-200">
+                            0 من 4 مكتملة
+                        </span>
+                    </div>
+                </div>
+                <div id="requestsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+            </section>
+            <!-- =========================
+                 UPLOAD SECTION
+            ========================== -->
+            <section id="uploadSection" class="glass-panel rounded-3xl p-6 sm:p-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-11 h-11 rounded-2xl bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 flex items-center justify-center">
+                        <i data-lucide="folder-plus" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-black text-white">
+                            إرفاق المستند
+                        </h2>
+                        <p id="uploadTargetText" class="text-xs text-cyan-200/70 mt-1">
+                            اختر طلب المستند الذي تريد رفع ملف له من قسم طلبات المستندات.
+                        </p>
+                    </div>
+                </div>
+                <!-- SELECTED REQUEST -->
+                <div id="selectedRequestBox" class="hidden mb-6 p-4 rounded-2xl bg-cyan-500/10 border border-cyan-400/30">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <p class="text-[10px] text-cyan-200/60 mb-1">
+                                أنت الآن ترفع مستندًا لـ
+                            </p>
+                            <h4 id="selectedRequestName" class="text-sm font-black text-white"></h4>
+                        </div>
+                        <button
+                            onclick="cancelRequestUpload()"
+                            class="text-xs text-cyan-200/70 hover:text-red-400 transition"
+                        >
+                            إلغاء الاختيار
+                        </button>
+                    </div>
+                </div>
+                <!-- DROP ZONE -->
+                <div
+                    id="dropZone"
+                    class="glass-menu-item rounded-3xl p-8 sm:p-12 text-center relative opacity-50 cursor-not-allowed transition-all"
+                >
+                    <input
+                        type="file"
+                        id="fileInput"
+                        multiple
+                        class="hidden"
+                        onchange="handleFileSelect(event)"
+                    >
+                    <div class="w-16 h-16 bg-cyan-500/20 text-cyan-300 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-cyan-400/30">
+                        <i data-lucide="cloud-upload" class="w-8 h-8"></i>
+                    </div>
+                    <h4 id="dropZoneTitle" class="text-base font-black text-white mb-2">
+                        اختر طلب مستند أولًا
+                    </h4>
+                    <p id="dropZoneDescription" class="text-xs text-cyan-200/60">
+                        بعد اختيار الطلب، يمكنك الضغط هنا لاختيار الملف المطلوب.
+                    </p>
+                </div>
+                <!-- FILE QUEUE -->
+                <div id="fileQueue" class="mt-6 space-y-4 hidden">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-xs font-bold text-cyan-200/80">
+                            الملفات المختارة للإرسال
+                        </h4>
+                        <span id="selectedFilesCount" class="text-[10px] text-cyan-200/50"></span>
+                    </div>
+                    <div id="fileList" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+                    <div class="pt-2">
+                        <button
+                            onclick="uploadFiles()"
+                            class="aqua-glow-btn text-white font-bold px-8 py-3.5 rounded-2xl text-sm flex items-center gap-2"
+                        >
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                            <span>تأكيد رفع المستند</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+            <!-- =========================
+                 UPLOADED DOCUMENTS
+            ========================== -->
+            <section class="glass-panel rounded-3xl p-6 sm:p-8 text-white">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-5 mb-8 pb-5 border-b border-white/10">
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-2xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center border border-cyan-400/30">
+                            <i data-lucide="files" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-black text-white">
+                                المستندات المرفوعة
+                            </h2>
+                            <p class="text-xs text-cyan-200/70 mt-1">
+                                تابع حالة كل مستند وملاحظات فريق التدقيق
+                            </p>
+                        </div>
+                    </div>
+                    <!-- FILTERS -->
+                    <div class="flex flex-wrap items-center gap-1.5 bg-black/30 p-1.5 rounded-2xl border border-white/10 text-xs">
+                        <button
+                            onclick="filterDocuments('all')"
+                            class="filter-btn px-4 py-2 rounded-xl font-bold transition"
+                            id="filter-all"
+                        >
+                            الكل
+                        </button>
+                        <button
+                            onclick="filterDocuments('review')"
+                            class="filter-btn px-4 py-2 rounded-xl font-bold transition"
+                            id="filter-review"
+                        >
+                            قيد المراجعة / مرفوع
+                        </button>
+                        <button
+                            onclick="filterDocuments('accepted')"
+                            class="filter-btn px-4 py-2 rounded-xl font-bold transition"
+                            id="filter-accepted"
+                        >
+                            المقبولة
+                        </button>
+                        <button
+                            onclick="filterDocuments('revision')"
+                            class="filter-btn px-4 py-2 rounded-xl font-bold transition"
+                            id="filter-revision"
+                        >
+                            تحتاج تعديل
+                        </button>
+                    </div>
+                </div>
+                <div id="documentsContainer" class="space-y-3"></div>
+            </section>
+        </main>
+        <!-- FOOTER -->
+        <footer class="py-6 text-center text-xs text-cyan-200/50 border-t border-white/5">
+            جميع الحقوق محفوظة © 2026 — بوابة التدقيق الإلكترونية
+        </footer>
+    </div>
+</div>
+<!-- =========================
+     DOCUMENT DETAILS MODAL
+========================= -->
+<div
+    id="docModal"
+    class="fixed inset-0 bg-slate-950/80 backdrop-blur-lg z-50 flex items-center justify-center p-4 hidden"
+>
+    <div class="glass-panel rounded-3xl max-w-lg w-full p-6 text-white shadow-2xl relative border border-white/20">
+        <button
+            onclick="closeModal()"
+            class="absolute left-5 top-5 text-cyan-200/70 hover:text-white p-1"
+        >
+            <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-11 h-11 rounded-2xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center border border-cyan-400/30">
+                <i data-lucide="file-text" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <h3 class="font-black text-base text-white" id="modalFileName">
+                    اسم المستند
+                </h3>
+                <p class="text-xs text-cyan-200/70 mt-1" id="modalFileDate"></p>
+            </div>
+        </div>
+        <div class="glass-menu-item rounded-2xl p-4 border border-white/10 mb-4">
+            <div class="flex justify-between items-center gap-4 text-xs">
+                <span class="text-cyan-200/70">
+                    حالة المستند الحالية
+                </span>
+                <span id="modalStatusBadge"></span>
+            </div>
+        </div>
+        <div class="glass-menu-item rounded-2xl p-4 border border-white/10 mb-6">
+            <p class="text-xs text-cyan-200/70 mb-2">
+                طلب المستند
+            </p>
+            <p class="text-sm font-bold text-white" id="modalRequestName"></p>
+            <div class="border-t border-white/10 my-4"></div>
+            <p class="text-xs text-cyan-200/70 mb-2">
+                ملاحظات فريق التدقيق
+            </p>
+            <p class="text-sm leading-relaxed text-white" id="modalNotes"></p>
+        </div>
+        <div class="flex gap-2">
+            <button
+                onclick="closeModal()"
+                class="w-full py-3 aqua-glow-btn text-white font-bold rounded-2xl text-xs"
+            >
+                إغلاق
+            </button>
+        </div>
+    </div>
+</div>
+<!-- TOAST -->
+<div id="toast" class="toast">
+    <div class="glass-panel rounded-2xl px-5 py-4 flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center">
+            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+        </div>
+        <span id="toastMessage" class="text-sm font-bold text-white"></span>
+    </div>
+</div>
+<script>
+    /* =========================================
+       APPLICATION DATA
+    ========================================= */
+    let documents = [];
+    let selectedFiles = [];
+    let selectedRequestId = null;
+    let currentFilter = 'all';
+    let activeModalDocId = null;
+    /*
+        حالات الطلب:
+        required   = مطلوب
+        uploaded   = تم تحميل الملف (باللون الأصفر)
+        review     = قيد المراجعة
+        accepted   = مقبول
+        revision   = يحتاج تعديل
+        additional = مطلوب مستند إضافي
+    */
+    let documentRequests = [
+        {
+            id: 1,
+            title: "ميزان المراجعة النهائي",
+            description: "يرجى رفع النسخة النهائية من ميزان المراجعة للسنة المالية محل التدقيق.",
+            status: "required",
+            priority: "high"
+        },
+        {
+            id: 2,
+            title: "كشوفات الحسابات البنكية",
+            description: "يرجى تزويدنا بكشوفات جميع الحسابات البنكية للفترة المطلوبة.",
+            status: "required",
+            priority: "high"
+        },
+        {
+            id: 3,
+            title: "تفاصيل الذمم المدينة",
+            description: "كشف تفصيلي بأرصدة العملاء وأعمار الديون كما في نهاية السنة المالية.",
+            status: "revision",
+            priority: "normal",
+            note: "الملف السابق لا يحتوي على أعمار الديون المطلوبة."
+        },
+        {
+            id: 4,
+            title: "كشف المخزون النهائي",
+            description: "يرجى رفع تفاصيل المخزون النهائي بعد الجرد السنوي.",
+            status: "additional",
+            priority: "normal",
+            note: "تم طلب هذا المستند كإجراء إضافي من فريق التدقيق."
+        }
+    ];
+    /* =========================================
+       INITIALIZATION
+    ========================================= */
+    document.addEventListener('DOMContentLoaded', function () {
+        lucide.createIcons();
+        renderRequests();
+        updateStats();
+        filterDocuments('all');
+        setupDragAndDrop();
+    });
+    /* =========================================
+       LOGIN
+    ========================================= */
+    function handleLogin(event) {
+        event.preventDefault();
+        document
+            .getElementById('loginScreen')
+            .classList.add('hidden');
+        document
+            .getElementById('portalScreen')
+            .classList.remove('hidden');
+        lucide.createIcons();
+        showToast('مرحبًا بك ');
+    }
+    function handleLogout() {
+        document
+            .getElementById('portalScreen')
+            .classList.add('hidden');
+        document
+            .getElementById('loginScreen')
+            .classList.remove('hidden');
+        closeModal();
+    }
+    
+    /* =========================================
+       RENDER DOCUMENT REQUESTS
+    ========================================= */
+    function renderRequests() {
+        const container =
+            document.getElementById('requestsContainer');
+        const completed =
+            documentRequests.filter(request =>
+                request.status === 'review' ||
+                request.status === 'accepted' ||
+                request.status === 'uploaded'
+            ).length;
+        document
+            .getElementById('requestsProgress')
+            .textContent =
+            `${completed} من ${documentRequests.length} مكتملة`;
+        container.innerHTML =
+            documentRequests.map(request => {
+                const status = getRequestStatus(request.status);
+                let actionButton = '';
+                if (
+                    request.status === 'required' ||
+                    request.status === 'revision' ||
+                    request.status === 'additional'
+                ) {
+                    actionButton = `
+                        <button
+                            onclick="selectRequestForUpload(${request.id})"
+                            class="aqua-glow-btn px-4 py-2.5 rounded-xl text-xs font-bold text-white flex items-center gap-2"
+                        >
+                            <i data-lucide="upload" class="w-4 h-4"></i>
+                            <span>
+                                ${
+                                    request.status === 'revision'
+                                    ? 'رفع نسخة جديدة'
+                                    : 'رفع المستند'
+                                }
+                            </span>
+                        </button>
+                    `;
+                } else if (request.status === 'review') {
+                    actionButton = `
+                        <span class="text-[10px] text-amber-200/70">
+                            بانتظار نتيجة المراجعة
+                        </span>
+                    `;
+                } else if (request.status === 'uploaded') {
+                    actionButton = `
+                        <span class="text-[10px] text-yellow-200/70 font-semibold">
+                            تم الرفع بنجاح
+                        </span>
+                    `;
+                } else if (request.status === 'accepted') {
+                    actionButton = `
+                        <span class="text-[10px] text-emerald-200/70">
+                            لا يوجد إجراء مطلوب منك
+                        </span>
+                    `;
+                }
+                return `
+                    <div class="glass-menu-item rounded-3xl p-5 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-1 h-full ${status.line}"></div>
+                        <div class="flex items-start justify-between gap-4 mb-5">
+                            <div class="flex items-start gap-3">
+                                <div class="w-11 h-11 rounded-2xl ${status.iconBg} ${status.iconColor} border ${status.iconBorder} flex items-center justify-center shrink-0">
+                                    <i
+                                        data-lucide="${status.icon}"
+                                        class="w-5 h-5"
+                                    ></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-black text-white mb-1">
+                                        ${request.title}
+                                    </h3>
+                                    <p class="text-[11px] text-cyan-200/60 leading-relaxed">
+                                        ${request.description}
+                                    </p>
+                                </div>
+                            </div>
+                            <span class="${status.badge}">
+                                ${status.label}
+                            </span>
+                        </div>
+                        ${
+                            request.note
+                            ? `
+                                <div class="mb-4 bg-black/20 border border-white/5 rounded-xl p-3">
+                                    <div class="flex gap-2 items-start">
+                                        <i data-lucide="message-square" class="w-4 h-4 text-cyan-300 shrink-0 mt-0.5"></i>
+                                        <p class="text-[10px] text-cyan-200/70 leading-relaxed">
+                                            ${request.note}
+                                        </p>
+                                    </div>
+                                </div>
+                            `
+                            : ''
+                        }
+                        <div class="flex justify-between items-center gap-3 pt-4 border-t border-white/10">
+                            <span class="text-[10px] text-cyan-200/40">
+                                طلب فريق التدقيق
+                            </span>
+                            ${actionButton}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        lucide.createIcons();
+        updateProgress();
+    }
+    
+    function getRequestStatus(status) {
+        const statuses = {
+            required: {
+                label: "مطلوب",
+                icon: "circle-alert",
+                line: "bg-red-400",
+                iconBg: "bg-red-500/20",
+                iconColor: "text-red-300",
+                iconBorder: "border-red-400/30",
+                badge: "px-3 py-1 rounded-full text-[10px] font-bold bg-red-500/20 text-red-300 border border-red-500/30 whitespace-nowrap"
+            },
+            uploaded: {
+                label: "تم تحميل الملف",
+                icon: "file-check-2",
+                line: "bg-yellow-400",
+                iconBg: "bg-yellow-500/20",
+                iconColor: "text-yellow-300",
+                iconBorder: "border-yellow-400/30",
+                badge: "px-3 py-1 rounded-full text-[10px] font-bold bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 whitespace-nowrap shadow-sm shadow-yellow-500/20"
+            },
+            review: {
+                label: "قيد المراجعة",
+                icon: "clock-3",
+                line: "bg-amber-400",
+                iconBg: "bg-amber-500/20",
+                iconColor: "text-amber-300",
+                iconBorder: "border-amber-400/30",
+                badge: "px-3 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap"
+            },
+            accepted: {
+                label: "مقبول",
+                icon: "circle-check-big",
+                line: "bg-emerald-400",
+                iconBg: "bg-emerald-500/20",
+                iconColor: "text-emerald-300",
+                iconBorder: "border-emerald-400/30",
+                badge: "px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 whitespace-nowrap"
+            },
+            revision: {
+                label: "يحتاج تعديل",
+                icon: "file-warning",
+                line: "bg-orange-400",
+                iconBg: "bg-orange-500/20",
+                iconColor: "text-orange-300",
+                iconBorder: "border-orange-400/30",
+                badge: "px-3 py-1 rounded-full text-[10px] font-bold bg-orange-500/20 text-orange-300 border border-orange-500/30 whitespace-nowrap"
+            },
+            additional: {
+                label: "مطلوب مستند إضافي",
+                icon: "file-plus-2",
+                line: "bg-purple-400",
+                iconBg: "bg-purple-500/20",
+                iconColor: "text-purple-300",
+                iconBorder: "border-purple-400/30",
+                badge: "px-3 py-1 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 whitespace-nowrap"
+            }
+        };
+        return statuses[status];
+    }
+    
+    /* =========================================
+       SELECT REQUEST FOR UPLOAD
+    ========================================= */
+    function selectRequestForUpload(id) {
+        selectedRequestId = id;
+        selectedFiles = [];
+        const request =
+            documentRequests.find(item => item.id === id);
+        document
+            .getElementById('selectedRequestBox')
+            .classList.remove('hidden');
+        document
+            .getElementById('selectedRequestName')
+            .textContent = request.title;
+        document
+            .getElementById('uploadTargetText')
+            .textContent =
+            'قم بإرفاق الملف المطلوب وسيتم ربطه تلقائيًا بهذا الطلب.';
+        const dropZone =
+            document.getElementById('dropZone');
+        dropZone.classList.remove(
+            'opacity-50',
+            'cursor-not-allowed'
+        );
+        dropZone.classList.add(
+            'cursor-pointer'
+        );
+        dropZone.onclick = function () {
+            document
+                .getElementById('fileInput')
+                .click();
+        };
+        document
+            .getElementById('dropZoneTitle')
+            .textContent =
+            'اضغط هنا لاختيار المستند';
+        document
+            .getElementById('dropZoneDescription')
+            .textContent =
+            `سيتم ربط الملف بطلب: ${request.title}`;
+        renderFileQueue();
+        document
+            .getElementById('uploadSection')
+            .scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        showToast(`تم اختيار طلب: ${request.title}`);
+    }
+    function cancelRequestUpload() {
+        selectedRequestId = null;
+        selectedFiles = [];
+        document
+            .getElementById('fileInput')
+            .value = '';
+        document
+            .getElementById('selectedRequestBox')
+            .classList.add('hidden');
+        document
+            .getElementById('fileQueue')
+            .classList.add('hidden');
+        const dropZone =
+            document.getElementById('dropZone');
+        dropZone.classList.add(
+            'opacity-50',
+            'cursor-not-allowed'
+        );
+        dropZone.classList.remove(
+            'cursor-pointer'
+        );
+        dropZone.onclick = null;
+        document
+            .getElementById('uploadTargetText')
+            .textContent =
+            'اختر طلب المستند الذي تريد رفع ملف له من قسم طلبات المستندات.';
+        document
+            .getElementById('dropZoneTitle')
+            .textContent =
+            'اختر طلب مستند أولًا';
+        document
+            .getElementById('dropZoneDescription')
+            .textContent =
+            'بعد اختيار الطلب، يمكنك الضغط هنا لاختيار الملف المطلوب.';
+    }
+    
+    /* =========================================
+       FILE SELECTION
+    ========================================= */
+    function handleFileSelect(event) {
+        if (!selectedRequestId) {
+            showToast('يرجى اختيار طلب مستند أولًا');
+            event.target.value = '';
+            return;
+        }
+        const files =
+            Array.from(event.target.files);
+        if (files.length > 0) {
+            selectedFiles =
+                [...selectedFiles, ...files];
+            renderFileQueue();
+        }
+    }
+    function renderFileQueue() {
+        const queueContainer =
+            document.getElementById('fileQueue');
+        const fileList =
+            document.getElementById('fileList');
+        const count =
+            document.getElementById('selectedFilesCount');
+        if (selectedFiles.length === 0) {
+            queueContainer.classList.add('hidden');
+            return;
+        }
+        queueContainer.classList.remove('hidden');
+        count.textContent =
+            `${selectedFiles.length} ملف`;
+        fileList.innerHTML =
+            selectedFiles.map((file, index) => `
+                <div class="flex items-center justify-between gap-3 glass-menu-item p-4 rounded-2xl border border-white/10">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center shrink-0">
+                            <i data-lucide="file" class="w-5 h-5"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-xs font-bold text-white truncate max-w-[220px]">
+                                ${escapeHTML(file.name)}
+                            </p>
+                            <p class="text-[10px] text-cyan-200/60">
+                                ${formatFileSize(file.size)}
+                            </p>
+                        </div>
+                    </div>
+                    <button
+                        onclick="removeFile(${index})"
+                        class="text-cyan-200/60 hover:text-red-400 hover:bg-white/10 p-2 rounded-xl transition"
+                    >
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            `).join('');
+        lucide.createIcons();
+    }
+    function removeFile(index) {
+        selectedFiles.splice(index, 1);
+        renderFileQueue();
+    }
+    /* =========================================
+       DRAG & DROP
+    ========================================= */
+    function setupDragAndDrop() {
+        const dropZone =
+            document.getElementById('dropZone');
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, function (event) {
+                event.preventDefault();
+                if (selectedRequestId) {
+                    dropZone.classList.add('drop-active');
+                }
+            });
+        });
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, function (event) {
+                event.preventDefault();
+                dropZone.classList.remove('drop-active');
+            });
+        });
+        dropZone.addEventListener('drop', function (event) {
+            if (!selectedRequestId) {
+                showToast('اختر طلب المستند أولًا');
+                return;
+            }
+            const droppedFiles =
+                Array.from(event.dataTransfer.files);
+            selectedFiles =
+                [...selectedFiles, ...droppedFiles];
+            renderFileQueue();
+        });
+    }
+    
+    /* =========================================
+       UPLOAD FILES
+    ========================================= */
+    function uploadFiles() {
+        if (!selectedRequestId) {
+            showToast('يرجى اختيار طلب المستند أولًا');
+            return;
+        }
+        if (selectedFiles.length === 0) {
+            showToast('يرجى اختيار ملف واحد على الأقل');
+            return;
+        }
+        const request =
+            documentRequests.find(
+                item => item.id === selectedRequestId
+            );
+        const today = new Date();
+        const formattedDate =
+            new Intl.DateTimeFormat(
+                'ar-JO',
+                {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                }
+            ).format(today);
+        selectedFiles.forEach((file, index) => {
+            documents.unshift({
+                id:
+                    Date.now() + index,
+                name:
+                    file.name,
+                uploadDate:
+                    formattedDate,
+                status:
+                    'uploaded',
+                requestId:
+                    request.id,
+                requestName:
+                    request.title,
+                auditorNotes:
+                    'تم استلام المستند بنجاح     .',
+                fileSize:
+                    formatFileSize(file.size)
+            });
+        });
+        /*
+           بعد الرفع تصبح حالة الطلب:
+           تم تحميل الملف (uploaded) بدلاً من قيد المراجعة 
+        */
+        request.status = 'uploaded';
+        selectedFiles = [];
+        document
+            .getElementById('fileInput')
+            .value = '';
+        renderFileQueue();
+        renderRequests();
+        updateStats();
+        renderDocuments();
+        showToast(
+            'تم رفع المستند بنجاح وتغيير الحالة'
+        );
+        cancelRequestUpload();
+        setTimeout(function () {
+            document
+                .getElementById('documentsContainer')
+                .scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+        }, 400);
+    }
+    /* =========================================
+       STATS
+    ========================================= */
+    function updateStats() {
+        const acceptedCount =
+            documents.filter(
+                doc => doc.status === 'accepted'
+            ).length;
+        const reviewCount =
+            documents.filter(
+                doc => doc.status === 'review' || doc.status === 'uploaded'
+            ).length;
+        const requiredCount =
+            documentRequests.filter(
+                request =>
+                    request.status === 'required' ||
+                    request.status === 'revision' ||
+                    request.status === 'additional'
+            ).length;
+        document
+            .getElementById('statAcceptedCount')
+            .textContent =
+            formatNumber(acceptedCount);
+        document
+            .getElementById('statReviewCount')
+            .textContent =
+            formatNumber(reviewCount);
+        document
+            .getElementById('statRequiredCount')
+            .textContent =
+            formatNumber(requiredCount);
+        updateProgress();
+    }
+    function updateProgress() {
+        const total =
+            documentRequests.length;
+        const completed =
+            documentRequests.filter(
+                request =>
+                    request.status === 'review' ||
+                    request.status === 'accepted' ||
+                    request.status === 'uploaded'
+            ).length;
+        const percent =
+            total === 0
+                ? 0
+                : Math.round(
+                    (completed / total) * 100
+                );
+        document
+            .getElementById('progressPercent')
+            .textContent =
+            `${percent}%`;
+        document
+            .getElementById('progressText')
+            .textContent =
+            `${completed} من ${total}`;
+        document
+            .getElementById('progressBar')
+            .style.width =
+            `${percent}%`;
+    }
+    
+    /* =========================================
+       FILTER DOCUMENTS
+    ========================================= */
+    function filterDocuments(filter) {
+        currentFilter = filter;
+        document
+            .querySelectorAll('.filter-btn')
+            .forEach(button => {
+                button.classList.remove(
+                    'bg-cyan-500',
+                    'text-slate-950'
+                );
+                button.classList.add(
+                    'text-cyan-200/70'
+                );
+            });
+        const activeButton =
+            document.getElementById(
+                `filter-${filter}`
+            );
+        if (activeButton) {
+            activeButton.classList.add(
+                'bg-cyan-500',
+                'text-slate-950'
+            );
+            activeButton.classList.remove(
+                'text-cyan-200/70'
+            );
+        }
+        renderDocuments();
+    }
+    /* =========================================
+       RENDER DOCUMENTS
+    ========================================= */
+    function renderDocuments() {
+        const container =
+            document.getElementById(
+                'documentsContainer'
+            );
+        const filteredDocuments =
+            documents.filter(doc => {
+                if (currentFilter === 'review') {
+                    return doc.status === 'review' || doc.status === 'uploaded';
+                }
+                if (currentFilter === 'accepted') {
+                    return doc.status === 'accepted';
+                }
+                if (currentFilter === 'revision') {
+                    return doc.status === 'revision';
+                }
+                return true;
+            });
+        if (filteredDocuments.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-16 text-cyan-200/60 rounded-3xl border border-dashed border-white/10 bg-black/20">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-3xl bg-cyan-500/10 flex items-center justify-center">
+                        <i
+                            data-lucide="file-up"
+                            class="w-8 h-8 text-cyan-400/50"
+                        ></i>
+                    </div>
+                    <h4 class="text-base font-bold text-white mb-2">
+                        لا توجد مستندات في هذه القائمة
+                    </h4>
+                    <p class="text-xs text-cyan-200/50">
+                        يمكنك البدء برفع المستندات المطلوبة من قسم طلبات المستندات.
+                    </p>
+                </div>
+            `;
+            lucide.createIcons();
+            return;
+        }
+        container.innerHTML =
+            filteredDocuments.map(doc => {
+                const status =
+                    getDocumentStatus(doc.status);
+                return `
+                    <div class="glass-menu-item rounded-2xl p-4 sm:p-5 transition">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5">
+                            <div class="flex items-center gap-4 min-w-0">
+                                <div class="w-12 h-12 rounded-2xl ${status.iconBg} ${status.iconColor} border ${status.iconBorder} flex items-center justify-center shrink-0">
+                                    <i
+                                        data-lucide="${status.icon}"
+                                        class="w-6 h-6"
+                                    ></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="font-black text-sm text-white mb-1 truncate">
+                                        ${escapeHTML(doc.name)}
+                                    </h4>
+                                    <p class="text-[10px] text-cyan-200/50 mb-1">
+                                        مرتبط بطلب: ${escapeHTML(doc.requestName)}
+                                    </p>
+                                    <div class="flex flex-wrap items-center gap-2 text-[10px] text-cyan-200/60">
+                                        <span>
+                                            ${doc.uploadDate}
+                                        </span>
+                                        <span>•</span>
+                                        <span>
+                                            ${doc.fileSize}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between w-full sm:w-auto gap-3 pt-3 sm:pt-0 border-t sm:border-0 border-white/10">
+                                <span class="${status.badge}">
+                                    <i
+                                        data-lucide="${status.smallIcon}"
+                                        class="w-3.5 h-3.5"
+                                    ></i>
+                                    ${status.label}
+                                </span>
+                                <div class="flex items-center gap-2">
+                                    <button
+                                        onclick="viewDocDetails(${doc.id})"
+                                        class="bg-white/10 hover:bg-cyan-500 text-white hover:text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition flex items-center gap-1.5 border border-white/10"
+                                    >
+                                        <i
+                                            data-lucide="eye"
+                                            class="w-4 h-4"
+                                        ></i>
+                                        <span>
+                                            التفاصيل
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        lucide.createIcons();
+    }
+    
+    function getDocumentStatus(status) {
+        const statuses = {
+            uploaded: {
+                label: 'تم تحميل الملف',
+                icon: 'file-check-2',
+                smallIcon: 'check-circle-2',
+                iconBg: 'bg-yellow-500/20',
+                iconColor: 'text-yellow-300',
+                iconBorder: 'border-yellow-400/30',
+                badge: 'px-3 py-1.5 rounded-full text-xs font-bold bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 flex items-center gap-1.5 shadow-sm shadow-yellow-500/20'
+            },
+            review: {
+                label: 'قيد المراجعة',
+                icon: 'clock-3',
+                smallIcon: 'clock-3',
+                iconBg: 'bg-amber-500/20',
+                iconColor: 'text-amber-300',
+                iconBorder: 'border-amber-400/30',
+                badge: 'px-3 py-1.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1.5'
+            },
+            accepted: {
+                label: 'مقبول',
+                icon: 'circle-check-big',
+                smallIcon: 'check',
+                iconBg: 'bg-emerald-500/20',
+                iconColor: 'text-emerald-300',
+                iconBorder: 'border-emerald-400/30',
+                badge: 'px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5'
+            },
+            revision: {
+                label: 'يحتاج تعديل',
+                icon: 'file-warning',
+                smallIcon: 'triangle-alert',
+                iconBg: 'bg-orange-500/20',
+                iconColor: 'text-orange-300',
+                iconBorder: 'border-orange-400/30',
+                badge: 'px-3 py-1.5 rounded-full text-xs font-bold bg-orange-500/20 text-orange-300 border border-orange-500/30 flex items-center gap-1.5'
+            }
+        };
+        return statuses[status];
+    }
+    
+    /* =========================================
+       DOCUMENT DETAILS
+    ========================================= */
+    function viewDocDetails(id) {
+        activeModalDocId = id;
+        const doc =
+            documents.find(
+                item => item.id === id
+            );
+        if (!doc) return;
+        const status =
+            getDocumentStatus(doc.status);
+        document
+            .getElementById('modalFileName')
+            .textContent =
+            doc.name;
+        document
+            .getElementById('modalFileDate')
+            .textContent =
+            `تاريخ الإرفاق: ${doc.uploadDate} • ${doc.fileSize}`;
+        document
+            .getElementById('modalRequestName')
+            .textContent =
+            doc.requestName;
+        document
+            .getElementById('modalNotes')
+            .textContent =
+            doc.auditorNotes;
+        const badge =
+            document.getElementById(
+                'modalStatusBadge'
+            );
+        badge.className =
+            status.badge;
+        badge.innerHTML = `
+            <i
+                data-lucide="${status.smallIcon}"
+                class="w-3.5 h-3.5"
+            ></i>
+            ${status.label}
+        `;
+        document
+            .getElementById('docModal')
+            .classList.remove('hidden');
+        lucide.createIcons();
+    }
+    function closeModal() {
+        document
+            .getElementById('docModal')
+            .classList.add('hidden');
+        activeModalDocId = null;
+    }
+    /* =========================================
+       TOAST
+    ========================================= */
+    let toastTimer = null;
+    function showToast(message) {
+        const toast =
+            document.getElementById('toast');
+        document
+            .getElementById('toastMessage')
+            .textContent =
+            message;
+        toast.classList.add('show');
+        lucide.createIcons();
+        clearTimeout(toastTimer);
+        toastTimer =
+            setTimeout(function () {
+                toast.classList.remove('show');
+            }, 3500);
+    }
+    /* =========================================
+       HELPERS
+    ========================================= */
+    function formatNumber(number) {
+        return number < 10
+            ? `0${number}`
+            : number;
+    }
+    function formatFileSize(bytes) {
+        if (bytes === 0) {
+            return '0 KB';
+        }
+        const kb =
+            bytes / 1024;
+        if (kb < 1024) {
+            return `${kb.toFixed(1)} KB`;
+        }
+        return `${(kb / 1024).toFixed(2)} MB`;
+    }
+    function escapeHTML(text) {
+        const div =
+            document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    /* =========================================
+       CLOSE MODAL WHEN CLICKING OUTSIDE
+    ========================================= */
+    document
+        .getElementById('docModal')
+        .addEventListener('click', function (event) {
+            if (
+                event.target ===
+                document.getElementById('docModal')
+            ) {
+                closeModal();
+            }
+        });
+</script>
+</body>
+</html>
