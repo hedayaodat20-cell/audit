@@ -1389,6 +1389,27 @@
                 closeModal();
             }
         });
+<script src="../app-bridge.js"></script>
+<script>
+    // التحديث التلقائي لوجهة العميل عند أي تغيير من المدقق
+    auditChannel.onmessage = (event) => {
+        if (event.data.type === 'DATA_CHANGED') {
+            renderClientPortal();
+        }
+    };
+
+    function renderClientPortal() {
+        const docs = getStoredDocs();
+        const total = docs.length;
+        const accepted = docs.filter(d => d.status === 'مقبول').length;
+        const pending = docs.filter(d => d.status === 'قيد المراجعة').length;
+        const progress = total > 0 ? Math.round((accepted / total) * 100) : 0;
+
+        console.log(`[بوابة العميل] نسبة الإنجاز: ${progress}% | المقبولة: ${accepted} | قيد المراجعة: ${pending}`);
+    }
+
+    // تشغيل التحديث عند فتح الصفحة أول مرة
+    renderClientPortal();
 </script>
 </body>
 </html>
