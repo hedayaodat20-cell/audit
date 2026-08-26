@@ -2532,6 +2532,22 @@
         window.onload = function() {
             lucide.createIcons();
         };
-    </script>
+ <script src="../app-bridge.js"></script>
+<script>
+    // التحديث التلقائي لوجهة المدقق عند رفع العميل لمستند جديد
+    auditChannel.onmessage = (event) => {
+        if (event.data.type === 'DATA_CHANGED') {
+            renderAuditDashboard();
+        }
+    };
+
+    function renderAuditDashboard() {
+        const docs = getStoredDocs();
+        console.log("[لوحة المدقق] المستندات المحدثة الحالية:", docs);
+    }
+
+    // تشغيل التحديث عند فتح الصفحة أول مرة
+    renderAuditDashboard();
+</script>
 </body>
 </html>
