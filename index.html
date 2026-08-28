@@ -1036,24 +1036,37 @@
             document.getElementById("notificationBadge").textContent = unread;
         }
 
-        /* LOGIN & LOGOUT FLOW */
-        function handleLogin(event) {
-            event.preventDefault();
-            document.getElementById("loginScreen").classList.add("hidden");
-            document.getElementById("portalScreen").classList.remove("hidden");
-            
-            updateCounters();
-            renderNotifications();
-            navigate("dashboard");
-            toast("مرحباً بك", "تم تسجيل الدخول إلى بوابة التدقيق بنجاح.");
+       async function handleLogin(event) {
+    event.preventDefault();
+
+    const form = event.target;
+    const email = form.querySelector('input[type="text"]').value.trim();
+    const password = form.querySelector('input[type="password"]').value;
+
+    try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email,
+            password
+        });
+
+        if (error) {
+            toast("فشل تسجيل الدخول", "البريد الإلكتروني أو كلمة المرور غير صحيحة.");
+            return;
         }
 
-        function handleLogout() {
-            document.getElementById("portalScreen").classList.add("hidden");
-            document.getElementById("loginScreen").classList.remove("hidden");
-            toast("تم الخروج", "تم تسجيل الخروج بنجاح.");
-        }
+        document.getElementById("loginScreen").classList.add("hidden");
+        document.getElementById("portalScreen").classList.remove("hidden");
 
+        updateCounters();
+        renderNotifications();
+        navigate("dashboard");
+
+        toast("مرحباً بك", "تم تسجيل الدخول إلى بوابة التدقيق بنجاح.");
+    } catch (error) {
+        console.error(error);
+        toast("خطأ", "حدث خطأ أثناء تسجيل الدخول.");
+    }
+}
         /* NAVIGATION & PAGES CONFIG */
         const pageInfo = {
             dashboard: ["لوحة التحكم", "نظرة عامة على بيئة التدقيق"],
@@ -2551,5 +2564,4 @@
 
 </body>
 </html>
-
 
