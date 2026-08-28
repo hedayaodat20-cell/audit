@@ -1036,7 +1036,7 @@
             document.getElementById("notificationBadge").textContent = unread;
         }
 
-       async function handleLogin(event) {
+      async function handleLogin(event) {
     event.preventDefault();
 
     const form = event.target;
@@ -1044,7 +1044,7 @@
     const password = form.querySelector('input[type="password"]').value;
 
     try {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
+        const { error } = await supabaseClient.auth.signInWithPassword({
             email,
             password
         });
@@ -1062,9 +1062,31 @@
         navigate("dashboard");
 
         toast("مرحباً بك", "تم تسجيل الدخول إلى بوابة التدقيق بنجاح.");
+
     } catch (error) {
         console.error(error);
         toast("خطأ", "حدث خطأ أثناء تسجيل الدخول.");
+    }
+}
+
+async function handleLogout() {
+    try {
+        const { error } = await supabaseClient.auth.signOut();
+
+        if (error) {
+            console.error(error);
+            toast("خطأ", "تعذر تسجيل الخروج.");
+            return;
+        }
+
+        document.getElementById("portalScreen").classList.add("hidden");
+        document.getElementById("loginScreen").classList.remove("hidden");
+
+        toast("تم الخروج", "تم تسجيل الخروج بنجاح.");
+
+    } catch (error) {
+        console.error(error);
+        toast("خطأ", "حدث خطأ أثناء تسجيل الخروج.");
     }
 }
         /* NAVIGATION & PAGES CONFIG */
@@ -2542,26 +2564,25 @@
         });
 
       
-        /* INITIALIZE ON LOAD */
-        window.onload = function() {
-            lucide.createIcons();
-            updateCounters();
-        };
-    </script>
+      window.onload = function() {
+    lucide.createIcons();
+};
+</script>
 
-    <!-- SUPABASE CONFIGURATION -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script>
-        const SUPABASE_URL = "https://wwybebjrddamormylzem.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_r6Pl1Cr0_wypoL1H93lt_g_-BBj_6_u";
+<script>
+const SUPABASE_URL = "https://wwybebjrddamormylzem.supabase.co";
+const SUPABASE_KEY = "sb_publishable_r6Pl1Cr0_wypoL1H93lt_g_-BBj_6_u";
 
-        const supabaseClient = window.supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_KEY
-        );
-    </script>
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+</script>
 
 </body>
 </html>
+
+
 
