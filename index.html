@@ -2528,26 +2528,28 @@
             document.getElementById("sidebar").classList.toggle("open");
         });
 
+      
         /* INITIALIZE ON LOAD */
         window.onload = function() {
             lucide.createIcons();
+            updateCounters();
         };
- <script src="../app-bridge.js"></script>
-<script>
-    // التحديث التلقائي لوجهة المدقق عند رفع العميل لمستند جديد
-    auditChannel.onmessage = (event) => {
-        if (event.data.type === 'DATA_CHANGED') {
-            renderAuditDashboard();
-        }
-    };
+    </script>
 
-    function renderAuditDashboard() {
-        const docs = getStoredDocs();
-        console.log("[لوحة المدقق] المستندات المحدثة الحالية:", docs);
-    }
+    <!-- SUPABASE CONFIGURATION -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    // تشغيل التحديث عند فتح الصفحة أول مرة
-    renderAuditDashboard();
-</script>
+    <script>
+        const SUPABASE_URL = "https://wwybebjrddamormylzem.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_r6Pl1Cr0_wypoL1H93lt_g_-BBj_6_u";
+
+        const supabaseClient = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+        );
+    </script>
+
 </body>
 </html>
+
+
