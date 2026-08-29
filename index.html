@@ -1974,7 +1974,6 @@
 
 
 <script>
-
 /* =========================================================
    SUPABASE CONFIGURATION
 ========================================================= */
@@ -1982,8 +1981,20 @@
 const SUPABASE_URL =
     "https://wwybebjrddamormylzem.supabase.co";
 
+/*
+   ضعي هنا Publishable Key الخاص بمشروع Supabase
+*/
 const SUPABASE_KEY =
     "sb_publishable_r6Pl1Cr0_wypoL1H93lt_g_-BBj_6_u";
+
+if (
+    !SUPABASE_KEY ||
+    SUPABASE_KEY === "ضعي_هنا_PUBLISHABLE_KEY"
+) {
+    console.warn(
+        "Supabase Publishable Key is missing."
+    );
+}
 
 const supabaseClient =
     window.supabase.createClient(
@@ -2019,6 +2030,8 @@ let localState = {
     notifications: []
 };
 
+let realtimeChannel = null;
+
 
 /* =========================================================
    PAGE INFORMATION
@@ -2026,113 +2039,95 @@ let localState = {
 
 const pageInfo = {
 
-    dashboard:
-        [
-            "لوحة التحكم",
-            "نظرة عامة على بيئة التدقيق"
-        ],
+    dashboard: [
+        "لوحة التحكم",
+        "نظرة عامة على بيئة التدقيق"
+    ],
 
-    clients:
-        [
-            "العملاء",
-            "إدارة بيانات العملاء"
-        ],
+    clients: [
+        "العملاء",
+        "إدارة بيانات العملاء"
+    ],
 
-    engagements:
-        [
-            "مهام التدقيق",
-            "إنشاء وإدارة مهام التدقيق"
-        ],
+    engagements: [
+        "مهام التدقيق",
+        "إنشاء وإدارة مهام التدقيق"
+    ],
 
-    requests:
-        [
-            "طلبات المستندات",
-            "إرسال ومتابعة طلبات المستندات"
-        ],
+    requests: [
+        "طلبات المستندات",
+        "إرسال ومتابعة طلبات المستندات"
+    ],
 
-    documents:
-        [
-            "المستندات",
-            "إدارة المستندات المرفوعة ومراجعتها"
-        ],
+    documents: [
+        "المستندات",
+        "إدارة المستندات المرفوعة ومراجعتها"
+    ],
 
-    transactions:
-        [
-            "البيانات والعمليات",
-            "البيانات المحاسبية والعمليات"
-        ],
+    transactions: [
+        "البيانات والعمليات",
+        "البيانات المحاسبية والعمليات"
+    ],
 
-    preaudit:
-        [
-            "الفحص الآلي",
-            "الفحص الأولي والاستثناءات الآلية"
-        ],
+    preaudit: [
+        "الفحص الآلي",
+        "الفحص الأولي والاستثناءات الآلية"
+    ],
 
-    workspace:
-        [
-            "مساحة التدقيق",
-            "بيئة العمل الخاصة بالمهمة"
-        ],
+    workspace: [
+        "مساحة التدقيق",
+        "بيئة العمل الخاصة بالمهمة"
+    ],
 
-    tests:
-        [
-            "الاختبارات",
-            "إجراءات واختبارات التدقيق"
-        ],
+    tests: [
+        "الاختبارات",
+        "إجراءات واختبارات التدقيق"
+    ],
 
-    samples:
-        [
-            "العينات",
-            "إدارة عينات التدقيق"
-        ],
+    samples: [
+        "العينات",
+        "إدارة عينات التدقيق"
+    ],
 
-    exceptions:
-        [
-            "الاستثناءات",
-            "إدارة الاستثناءات والمخاطر"
-        ],
+    exceptions: [
+        "الاستثناءات",
+        "إدارة الاستثناءات والمخاطر"
+    ],
 
-    inquiries:
-        [
-            "الاستفسارات",
-            "طلبات التوضيح والتواصل مع العميل"
-        ],
+    inquiries: [
+        "الاستفسارات",
+        "طلبات التوضيح والتواصل مع العميل"
+    ],
 
-    workingpapers:
-        [
-            "أوراق العمل",
-            "Electronic Working Papers"
-        ],
+    workingpapers: [
+        "أوراق العمل",
+        "Electronic Working Papers"
+    ],
 
-    analytical:
-        [
-            "المراجعة التحليلية",
-            "تحليل الفروقات والاتجاهات"
-        ],
+    analytical: [
+        "المراجعة التحليلية",
+        "تحليل الفروقات والاتجاهات"
+    ],
 
-    review:
-        [
-            "المراجعة الداخلية",
-            "مراجعة واعتماد أعمال التدقيق"
-        ],
+    review: [
+        "المراجعة الداخلية",
+        "مراجعة واعتماد أعمال التدقيق"
+    ],
 
-    reports:
-        [
-            "التقارير",
-            "إعداد وإدارة تقارير التدقيق"
-        ],
+    reports: [
+        "التقارير",
+        "إعداد وإدارة تقارير التدقيق"
+    ],
 
-    archive:
-        [
-            "الأرشيف",
-            "الملفات المغلقة والمؤرشفة"
-        ],
+    archive: [
+        "الأرشيف",
+        "الملفات المغلقة والمؤرشفة"
+    ],
 
-    audittrail:
-        [
-            "سجل التدقيق",
-            "سجل العمليات والتغييرات"
-        ]
+    audittrail: [
+        "سجل التدقيق",
+        "سجل العمليات والتغييرات"
+    ]
 };
 
 
@@ -2144,35 +2139,57 @@ document.addEventListener(
     "DOMContentLoaded",
     async function () {
 
-        lucide.createIcons();
+        try {
 
-        setupNavigation();
-        setupModalEvents();
-        setupNotificationEvents();
-        setupMobileMenu();
+            lucide.createIcons();
 
-        renderNotifications();
+            loadLocalState();
 
-        if (
-            !SUPABASE_KEY ||
-            SUPABASE_KEY ===
-                "ضع_هنا_PUBLISHABLE_KEY"
-        ) {
+            setupNavigation();
+            setupModalEvents();
+            setupNotificationEvents();
+            setupMobileMenu();
+
+            updateCounters();
+            renderNotifications();
+
+            if (
+                !SUPABASE_KEY ||
+                SUPABASE_KEY === "ضعي_هنا_PUBLISHABLE_KEY"
+            ) {
+
+                setSystemStatus(
+                    false,
+                    "Publishable Key غير موجود"
+                );
+
+                showToast(
+                    "إعداد ناقص",
+                    "ضعي Publishable Key الصحيح في الكود."
+                );
+
+                return;
+            }
+
+            setSystemStatus(
+                true,
+                "جارٍ الاتصال بـ Supabase..."
+            );
+
+            await restoreSession();
+
+        } catch (error) {
+
+            console.error(
+                "INITIALIZATION ERROR:",
+                error
+            );
 
             setSystemStatus(
                 false,
-                "Publishable Key غير موجود"
+                "خطأ في التشغيل"
             );
-
-            showToast(
-                "إعداد ناقص",
-                "ضعي Publishable Key الخاص بـ Supabase داخل الكود."
-            );
-
-            return;
         }
-
-        await restoreSession();
     }
 );
 
@@ -2192,14 +2209,20 @@ function setSystemStatus(
         );
 
     if (element) {
+
         element.textContent =
             text;
+
+        element.style.color =
+            online
+                ? ""
+                : "#ff8193";
     }
 }
 
 
 /* =========================================================
-   SESSION
+   SESSION RESTORE
 ========================================================= */
 
 async function restoreSession() {
@@ -2227,7 +2250,15 @@ async function restoreSession() {
             return;
         }
 
-        if (!data?.session?.user) {
+        if (
+            !data?.session?.user
+        ) {
+
+            setSystemStatus(
+                true,
+                "بانتظار تسجيل الدخول"
+            );
+
             return;
         }
 
@@ -2240,6 +2271,11 @@ async function restoreSession() {
         console.error(
             "RESTORE SESSION ERROR:",
             error
+        );
+
+        setSystemStatus(
+            false,
+            "خطأ في الجلسة"
         );
     }
 }
@@ -2255,27 +2291,33 @@ async function handleLogin(
 
     event.preventDefault();
 
-    const email =
-        document
-            .getElementById(
-                "loginEmail"
-            )
-            .value
-            .trim();
+    const emailElement =
+        document.getElementById(
+            "loginEmail"
+        );
 
-    const password =
-        document
-            .getElementById(
-                "loginPassword"
-            )
-            .value;
+    const passwordElement =
+        document.getElementById(
+            "loginPassword"
+        );
 
     const loginButton =
         document.getElementById(
             "loginButton"
         );
 
-    if (!email || !password) {
+    const email =
+        emailElement?.value
+            ?.trim()
+            ?.toLowerCase() || "";
+
+    const password =
+        passwordElement?.value || "";
+
+    if (
+        !email ||
+        !password
+    ) {
 
         showToast(
             "بيانات ناقصة",
@@ -2285,38 +2327,63 @@ async function handleLogin(
         return;
     }
 
+    if (
+        !SUPABASE_KEY ||
+        SUPABASE_KEY ===
+            "ضعي_هنا_PUBLISHABLE_KEY"
+    ) {
+
+        showToast(
+            "إعداد ناقص",
+            "ضعي Publishable Key في الكود أولًا."
+        );
+
+        return;
+    }
+
     try {
 
-        loginButton.disabled =
-            true;
+        if (loginButton) {
 
-        const span =
-            loginButton.querySelector(
-                "span"
-            );
+            loginButton.disabled =
+                true;
 
-        if (span) {
-            span.textContent =
-                "جارٍ التحقق...";
+            const span =
+                loginButton.querySelector(
+                    "span"
+                );
+
+            if (span) {
+
+                span.textContent =
+                    "جارٍ التحقق...";
+            }
         }
+
+        setSystemStatus(
+            true,
+            "جارٍ تسجيل الدخول..."
+        );
 
         const {
             data,
             error
         } =
             await supabaseClient.auth.signInWithPassword({
-
-                email:
-                    email,
-
-                password:
-                    password
+                email,
+                password
             });
+
+        console.log(
+            "LOGIN RESPONSE:",
+            data,
+            error
+        );
 
         if (error) {
 
             console.error(
-                "LOGIN ERROR:",
+                "LOGIN ERROR FULL:",
                 error
             );
 
@@ -2326,6 +2393,11 @@ async function handleLogin(
                 "البريد الإلكتروني أو كلمة المرور غير صحيحة."
             );
 
+            setSystemStatus(
+                false,
+                "فشل تسجيل الدخول"
+            );
+
             return;
         }
 
@@ -2333,7 +2405,7 @@ async function handleLogin(
 
             showToast(
                 "خطأ",
-                "تعذر الحصول على بيانات الحساب."
+                "تم تسجيل الدخول ولكن لم يتم العثور على المستخدم."
             );
 
             return;
@@ -2358,24 +2430,28 @@ async function handleLogin(
 
     } finally {
 
-        loginButton.disabled =
-            false;
+        if (loginButton) {
 
-        const span =
-            loginButton.querySelector(
-                "span"
-            );
+            loginButton.disabled =
+                false;
 
-        if (span) {
-            span.textContent =
-                "دخول البوابة";
+            const span =
+                loginButton.querySelector(
+                    "span"
+                );
+
+            if (span) {
+
+                span.textContent =
+                    "دخول البوابة";
+            }
         }
     }
 }
 
 
 /* =========================================================
-   VERIFY AUDITOR ROLE
+   AUDITOR ROLE
 ========================================================= */
 
 async function completeAuditorLogin(
@@ -2383,6 +2459,13 @@ async function completeAuditorLogin(
 ) {
 
     try {
+
+        if (!user?.id) {
+
+            throw new Error(
+                "تعذر تحديد User ID."
+            );
+        }
 
         setSystemStatus(
             true,
@@ -2394,12 +2477,8 @@ async function completeAuditorLogin(
             error: roleError
         } =
             await supabaseClient
-                .from(
-                    "user_roles"
-                )
-                .select(
-                    "role"
-                )
+                .from("user_roles")
+                .select("role")
                 .eq(
                     "user_id",
                     user.id
@@ -2415,11 +2494,8 @@ async function completeAuditorLogin(
 
             showToast(
                 "تعذر التحقق من الصلاحيات",
-                roleError.message ||
-                "حدث خطأ أثناء قراءة صلاحيات الحساب."
+                roleError.message
             );
-
-            await supabaseClient.auth.signOut();
 
             return false;
         }
@@ -2452,30 +2528,44 @@ async function completeAuditorLogin(
 
         setSystemStatus(
             true,
-            `متصل • صلاحية ${currentRole === "admin" ? "مدير" : "مدقق"}`
+            currentRole === "admin"
+                ? "متصل • مدير"
+                : "متصل • مدقق"
         );
 
-        document
-            .getElementById(
+        const loginScreen =
+            document.getElementById(
                 "loginScreen"
-            )
-            .classList.add(
-                "hidden"
             );
 
-        document
-            .getElementById(
+        const portalScreen =
+            document.getElementById(
                 "portalScreen"
-            )
-            .classList.remove(
+            );
+
+        if (loginScreen) {
+
+            loginScreen.classList.add(
                 "hidden"
             );
+        }
+
+        if (portalScreen) {
+
+            portalScreen.classList.remove(
+                "hidden"
+            );
+        }
 
         await refreshDatabaseData();
 
+        setupRealtimeUpdates();
+
         updateCounters();
 
-        navigate("dashboard");
+        navigate(
+            "dashboard"
+        );
 
         showToast(
             "مرحبًا بك",
@@ -2487,7 +2577,7 @@ async function completeAuditorLogin(
     } catch (error) {
 
         console.error(
-            "AUDITOR LOGIN ERROR:",
+            "COMPLETE AUDITOR LOGIN ERROR:",
             error
         );
 
@@ -2510,6 +2600,17 @@ async function handleLogout() {
 
     try {
 
+        if (realtimeChannel) {
+
+            await supabaseClient
+                .removeChannel(
+                    realtimeChannel
+                );
+
+            realtimeChannel =
+                null;
+        }
+
         const {
             error
         } =
@@ -2531,28 +2632,44 @@ async function handleLogout() {
             return;
         }
 
-        currentUser = null;
-        currentRole = null;
+        currentUser =
+            null;
 
-        dbClients = [];
-        dbRequests = [];
-        dbDocuments = [];
+        currentRole =
+            null;
 
-        document
-            .getElementById(
+        dbClients =
+            [];
+
+        dbRequests =
+            [];
+
+        dbDocuments =
+            [];
+
+        const portal =
+            document.getElementById(
                 "portalScreen"
-            )
-            .classList.add(
-                "hidden"
             );
 
-        document
-            .getElementById(
+        const login =
+            document.getElementById(
                 "loginScreen"
-            )
-            .classList.remove(
+            );
+
+        if (portal) {
+
+            portal.classList.add(
                 "hidden"
             );
+        }
+
+        if (login) {
+
+            login.classList.remove(
+                "hidden"
+            );
+        }
 
         const password =
             document.getElementById(
@@ -2560,6 +2677,7 @@ async function handleLogout() {
             );
 
         if (password) {
+
             password.value =
                 "";
         }
@@ -2596,13 +2714,52 @@ async function handleLogout() {
 
 async function refreshDatabaseData() {
 
-    await Promise.all([
-        loadClientsFromSupabase(),
-        loadRequestsFromSupabase(),
-        loadDocumentsFromSupabase()
-    ]);
+    try {
 
-    updateCounters();
+        await Promise.all([
+            loadClientsFromSupabase(),
+            loadRequestsFromSupabase(),
+            loadDocumentsFromSupabase()
+        ]);
+
+        updateCounters();
+
+        if (
+            currentPage ===
+            "dashboard"
+        ) {
+
+            renderDashboard();
+
+        } else if (
+            currentPage ===
+            "clients"
+        ) {
+
+            renderClients();
+
+        } else if (
+            currentPage ===
+            "requests"
+        ) {
+
+            renderRequestsPage();
+
+        } else if (
+            currentPage ===
+            "documents"
+        ) {
+
+            renderDocuments();
+        }
+
+    } catch (error) {
+
+        console.error(
+            "DATABASE REFRESH ERROR:",
+            error
+        );
+    }
 }
 
 
@@ -2612,49 +2769,38 @@ async function refreshDatabaseData() {
 
 async function loadClientsFromSupabase() {
 
-    try {
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("clients")
+            .select("*")
+            .order(
+                "created_at",
+                {
+                    ascending:
+                        false
+                }
+            );
 
-        const {
-            data,
+    if (error) {
+
+        console.error(
+            "CLIENTS LOAD ERROR:",
             error
-        } =
-            await supabaseClient
-                .from(
-                    "clients"
-                )
-                .select(
-                    "*"
-                )
-                .order(
-                    "created_at",
-                    {
-                        ascending:
-                            false
-                    }
-                );
+        );
 
-        if (error) {
+        showToast(
+            "خطأ العملاء",
+            error.message
+        );
 
-            console.error(
-                "CLIENTS LOAD ERROR:",
-                error
-            );
-
-            showToast(
-                "خطأ العملاء",
-                error.message
-            );
-
-            return;
-        }
-
-        dbClients =
-            data || [];
-
-    } catch (error) {
-
-        console.error(error);
+        return;
     }
+
+    dbClients =
+        data || [];
 }
 
 
@@ -2664,49 +2810,38 @@ async function loadClientsFromSupabase() {
 
 async function loadRequestsFromSupabase() {
 
-    try {
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("document_requests")
+            .select("*")
+            .order(
+                "created_at",
+                {
+                    ascending:
+                        false
+                }
+            );
 
-        const {
-            data,
+    if (error) {
+
+        console.error(
+            "REQUESTS LOAD ERROR:",
             error
-        } =
-            await supabaseClient
-                .from(
-                    "document_requests"
-                )
-                .select(
-                    "*"
-                )
-                .order(
-                    "created_at",
-                    {
-                        ascending:
-                            false
-                    }
-                );
+        );
 
-        if (error) {
+        showToast(
+            "خطأ طلبات المستندات",
+            error.message
+        );
 
-            console.error(
-                "REQUESTS LOAD ERROR:",
-                error
-            );
-
-            showToast(
-                "خطأ طلبات المستندات",
-                error.message
-            );
-
-            return;
-        }
-
-        dbRequests =
-            data || [];
-
-    } catch (error) {
-
-        console.error(error);
+        return;
     }
+
+    dbRequests =
+        data || [];
 }
 
 
@@ -2716,49 +2851,177 @@ async function loadRequestsFromSupabase() {
 
 async function loadDocumentsFromSupabase() {
 
-    try {
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("documents")
+            .select("*")
+            .order(
+                "upload_date",
+                {
+                    ascending:
+                        false
+                }
+            );
 
-        const {
-            data,
+    if (error) {
+
+        console.error(
+            "DOCUMENTS LOAD ERROR:",
             error
-        } =
-            await supabaseClient
-                .from(
-                    "documents"
-                )
-                .select(
-                    "*"
-                )
-                .order(
-                    "upload_date",
-                    {
-                        ascending:
-                            false
-                    }
-                );
+        );
 
-        if (error) {
+        showToast(
+            "خطأ المستندات",
+            error.message
+        );
 
-            console.error(
-                "DOCUMENTS LOAD ERROR:",
-                error
-            );
-
-            showToast(
-                "خطأ المستندات",
-                error.message
-            );
-
-            return;
-        }
-
-        dbDocuments =
-            data || [];
-
-    } catch (error) {
-
-        console.error(error);
+        return;
     }
+
+    dbDocuments =
+        data || [];
+}
+
+
+/* =========================================================
+   REALTIME
+========================================================= */
+
+function setupRealtimeUpdates() {
+
+    if (realtimeChannel) {
+
+        supabaseClient
+            .removeChannel(
+                realtimeChannel
+            );
+
+        realtimeChannel =
+            null;
+    }
+
+    realtimeChannel =
+        supabaseClient
+            .channel(
+                "audit-portal-live"
+            )
+
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "clients"
+                },
+                async function () {
+
+                    await loadClientsFromSupabase();
+
+                    updateCounters();
+
+                    if (
+                        currentPage ===
+                        "clients"
+                    ) {
+
+                        renderClients();
+                    }
+                }
+            )
+
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "document_requests"
+                },
+                async function () {
+
+                    await loadRequestsFromSupabase();
+
+                    updateCounters();
+
+                    if (
+                        currentPage ===
+                        "requests"
+                    ) {
+
+                        renderRequestsPage();
+                    }
+
+                    if (
+                        currentPage ===
+                        "documents"
+                    ) {
+
+                        renderDocuments();
+                    }
+                }
+            )
+
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "documents"
+                },
+                async function (payload) {
+
+                    console.log(
+                        "DOCUMENT REALTIME EVENT:",
+                        payload
+                    );
+
+                    await loadDocumentsFromSupabase();
+
+                    updateCounters();
+
+                    renderDocuments();
+
+                    if (
+                        currentPage ===
+                        "dashboard"
+                    ) {
+
+                        renderDashboard();
+                    }
+
+                    /*
+                       إشعار محلي فقط عند الرفع الجديد
+                    */
+
+                    if (
+                        payload.eventType ===
+                        "INSERT"
+                    ) {
+
+                        const client =
+                            getClientById(
+                                payload.new?.client_id
+                            );
+
+                        addLocalNotification(
+                            "مستند جديد",
+                            `تم رفع مستند جديد من ${client?.name || "أحد العملاء"}.`
+                        );
+                    }
+                }
+            )
+
+            .subscribe(
+                function (status) {
+
+                    console.log(
+                        "REALTIME STATUS:",
+                        status
+                    );
+                }
+            );
 }
 
 
@@ -2798,7 +3061,12 @@ function updateCounters() {
     Object
         .entries(values)
         .forEach(
-            ([id, value]) => {
+            function (
+                [
+                    id,
+                    value
+                ]
+            ) {
 
                 const element =
                     document.getElementById(
@@ -2825,6 +3093,7 @@ function updateCounters() {
         );
 
     if (badge) {
+
         badge.textContent =
             unread;
     }
@@ -2842,7 +3111,7 @@ function setupNavigation() {
             ".nav-item[data-page]"
         )
         .forEach(
-            button => {
+            function (button) {
 
                 button.addEventListener(
                     "click",
@@ -2858,7 +3127,9 @@ function setupNavigation() {
 }
 
 
-function navigate(page) {
+function navigate(
+    page
+) {
 
     currentPage =
         page;
@@ -2868,7 +3139,7 @@ function navigate(page) {
             ".nav-item[data-page]"
         )
         .forEach(
-            item => {
+            function (item) {
 
                 item.classList.toggle(
                     "active",
@@ -2882,37 +3153,51 @@ function navigate(page) {
         pageInfo[page] ||
         pageInfo.dashboard;
 
-    document
-        .getElementById(
+    const title =
+        document.getElementById(
             "currentPageTitle"
-        )
-        .textContent =
-        info[0];
+        );
 
-    document
-        .getElementById(
+    const subtitle =
+        document.getElementById(
             "currentPageSubtitle"
-        )
-        .textContent =
-        info[1];
+        );
+
+    if (title) {
+
+        title.textContent =
+            info[0];
+    }
+
+    if (subtitle) {
+
+        subtitle.textContent =
+            info[1];
+    }
 
     renderPage(
         page
     );
 
-    document
-        .getElementById(
+    const sidebar =
+        document.getElementById(
             "sidebar"
-        )
-        .classList.remove(
+        );
+
+    if (sidebar) {
+
+        sidebar.classList.remove(
             "open"
         );
+    }
 
     lucide.createIcons();
 }
 
 
-function renderPage(page) {
+function renderPage(
+    page
+) {
 
     const pages = {
 
@@ -2975,6 +3260,8 @@ function renderPage(page) {
         pages[page] ||
         renderDashboard
     )();
+
+    lucide.createIcons();
 }
 
 
@@ -2988,6 +3275,10 @@ function renderDashboard() {
         document.getElementById(
             "content"
         );
+
+    if (!content) {
+        return;
+    }
 
     const uploaded =
         dbDocuments.filter(
@@ -3032,7 +3323,7 @@ function renderDashboard() {
                 </h2>
 
                 <p>
-                    من هنا يمكنك إدارة العملاء وطلبات المستندات
+                    من هنا يمكنك إدارة العملاء وطلبات المستندات،
                     ومراجعة الملفات المرفوعة من العملاء.
                 </p>
 
@@ -3097,6 +3388,7 @@ function renderDashboard() {
                     </button>
 
                 </div>
+
 
                 <div class="timeline">
 
@@ -3191,7 +3483,7 @@ function renderDashboard() {
                         </div>
 
                         <div class="panel-sub">
-                            آخر الملفات التي رفعها العملاء
+                            آخر الملفات المرفوعة من العملاء
                         </div>
 
                     </div>
@@ -3200,17 +3492,21 @@ function renderDashboard() {
 
                 ${
                     dbDocuments.length === 0
+
                         ? emptyState(
                             "لا توجد مستندات",
                             "ستظهر المستندات هنا بعد رفعها من العملاء."
                         )
+
                         : dbDocuments
                             .slice(
                                 0,
                                 5
                             )
                             .map(
-                                doc => {
+                                function (
+                                    doc
+                                ) {
 
                                     const client =
                                         getClientById(
@@ -3219,10 +3515,7 @@ function renderDashboard() {
 
                                     return `
 
-                                        <div
-                                            class="notification-item"
-                                            style="border-bottom:1px solid rgba(255,255,255,.06);"
-                                        >
+                                        <div class="notification-item">
 
                                             <strong>
                                                 ${escapeHTML(
@@ -3245,7 +3538,6 @@ function renderDashboard() {
                                             </time>
 
                                         </div>
-
                                     `;
                                 }
                             )
@@ -3279,9 +3571,7 @@ function statCard(
 
                 <div class="stat-icon">
 
-                    <i
-                        data-lucide="${icon}"
-                    ></i>
+                    <i data-lucide="${icon}"></i>
 
                 </div>
 
@@ -3323,6 +3613,7 @@ function renderClients() {
 
             </div>
 
+
             <div class="page-actions">
 
                 <button
@@ -3330,23 +3621,17 @@ function renderClients() {
                     type="button"
                     onclick="openClientModal()"
                 >
-
                     <i data-lucide="plus"></i>
-
                     إضافة ملف عميل
-
                 </button>
 
                 <button
                     class="btn secondary"
                     type="button"
-                    onclick="refreshDatabaseData(); navigate('clients')"
+                    onclick="manualRefresh('clients')"
                 >
-
                     <i data-lucide="refresh-cw"></i>
-
                     تحديث
-
                 </button>
 
             </div>
@@ -3378,6 +3663,30 @@ function renderClients() {
     );
 
     lucide.createIcons();
+}
+
+
+async function manualRefresh(
+    page
+) {
+
+    setSystemStatus(
+        true,
+        "جارٍ تحديث البيانات..."
+    );
+
+    await refreshDatabaseData();
+
+    setSystemStatus(
+        true,
+        currentRole === "admin"
+            ? "متصل • مدير"
+            : "متصل • مدقق"
+    );
+
+    navigate(
+        page
+    );
 }
 
 
@@ -3418,33 +3727,19 @@ function renderClientsTable(
 
                     <tr>
 
-                        <th>
-                            اسم العميل
-                        </th>
+                        <th>اسم العميل</th>
 
-                        <th>
-                            البريد
-                        </th>
+                        <th>البريد</th>
 
-                        <th>
-                            الرقم الضريبي
-                        </th>
+                        <th>الرقم الضريبي</th>
 
-                        <th>
-                            النشاط
-                        </th>
+                        <th>النشاط</th>
 
-                        <th>
-                            الحساب المرتبط
-                        </th>
+                        <th>الحساب المرتبط</th>
 
-                        <th>
-                            تاريخ الإضافة
-                        </th>
+                        <th>تاريخ الإضافة</th>
 
-                        <th>
-                            الإجراءات
-                        </th>
+                        <th>الإجراءات</th>
 
                     </tr>
 
@@ -3453,9 +3748,12 @@ function renderClientsTable(
 
                 <tbody>
 
-                    ${list
-                        .map(
-                            client => `
+                    ${list.map(
+                        function (
+                            client
+                        ) {
+
+                            return `
 
                                 <tr>
 
@@ -3491,11 +3789,15 @@ function renderClientsTable(
                                     </td>
 
                                     <td>
+
                                         ${
                                             client.user_id
+
                                                 ? `<span class="badge green">مرتبط</span>`
+
                                                 : `<span class="badge red">غير مرتبط</span>`
                                         }
+
                                     </td>
 
                                     <td>
@@ -3517,10 +3819,9 @@ function renderClientsTable(
                                     </td>
 
                                 </tr>
-
-                            `
-                        )
-                        .join("")}
+                            `;
+                        }
+                    ).join("")}
 
                 </tbody>
 
@@ -3546,18 +3847,26 @@ function filterClients(
 
     const filtered =
         dbClients.filter(
-            client => {
+            function (
+                client
+            ) {
 
                 return [
+
                     client.name,
                     client.email,
                     client.tax_number,
                     client.activity,
                     client.contact
+
                 ]
+
                     .filter(Boolean)
+
                     .join(" ")
+
                     .toLowerCase()
+
                     .includes(
                         query
                     );
@@ -3570,6 +3879,10 @@ function filterClients(
 }
 
 
+/* =========================================================
+   CLIENT MODAL
+========================================================= */
+
 function openClientModal() {
 
     openModal(
@@ -3577,12 +3890,11 @@ function openClientModal() {
         `
             <div class="info-box mb-4">
 
-                حساب العميل نفسه يجب إنشاؤه أولًا من
-                <strong>Authentication → Users</strong>.
-                بعد ذلك ضعي User ID في الحقل أدناه لربط ملف العميل بالحساب.
+                حساب العميل يجب أن يكون موجودًا
+                في Authentication → Users أولًا،
+                ثم يوضع User ID لربط الملف.
 
             </div>
-
 
             <form
                 id="clientForm"
@@ -3600,7 +3912,6 @@ function openClientModal() {
                         <input
                             name="name"
                             required
-                            placeholder="مثال: شركة ميناء المدقق"
                         >
 
                     </div>
@@ -3609,12 +3920,12 @@ function openClientModal() {
                     <div class="form-group">
 
                         <label>
-                            User ID للحساب
+                            User ID
                         </label>
 
                         <input
                             name="user_id"
-                            placeholder="UUID الخاص بالمستخدم"
+                            placeholder="UUID"
                         >
 
                     </div>
@@ -3629,7 +3940,6 @@ function openClientModal() {
                         <input
                             name="email"
                             type="email"
-                            placeholder="client@example.com"
                         >
 
                     </div>
@@ -3664,7 +3974,7 @@ function openClientModal() {
                     <div class="form-group">
 
                         <label>
-                            بيانات التواصل
+                            التواصل
                         </label>
 
                         <input
@@ -3724,6 +4034,8 @@ function openClientModal() {
             </form>
         `
     );
+
+    lucide.createIcons();
 }
 
 
@@ -3811,9 +4123,7 @@ async function saveSupabaseClient(
         error
     } =
         await supabaseClient
-            .from(
-                "clients"
-            )
+            .from("clients")
             .insert(
                 payload
             )
@@ -3843,7 +4153,7 @@ async function saveSupabaseClient(
 
     closeModal();
 
-    toast(
+    showToast(
         "تم الحفظ",
         "تم إنشاء ملف العميل بنجاح."
     );
@@ -3853,6 +4163,10 @@ async function saveSupabaseClient(
     );
 }
 
+
+/* =========================================================
+   VIEW CLIENT
+========================================================= */
 
 function viewSupabaseClient(
     id
@@ -3877,9 +4191,7 @@ function viewSupabaseClient(
 
                 <div class="form-group">
 
-                    <label>
-                        اسم العميل
-                    </label>
+                    <label>اسم العميل</label>
 
                     <input
                         value="${escapeAttribute(client.name || "")}"
@@ -3891,9 +4203,7 @@ function viewSupabaseClient(
 
                 <div class="form-group">
 
-                    <label>
-                        البريد
-                    </label>
+                    <label>البريد</label>
 
                     <input
                         value="${escapeAttribute(client.email || "")}"
@@ -3905,9 +4215,7 @@ function viewSupabaseClient(
 
                 <div class="form-group">
 
-                    <label>
-                        User ID
-                    </label>
+                    <label>User ID</label>
 
                     <input
                         value="${escapeAttribute(client.user_id || "")}"
@@ -3919,9 +4227,7 @@ function viewSupabaseClient(
 
                 <div class="form-group">
 
-                    <label>
-                        الرقم الضريبي
-                    </label>
+                    <label>الرقم الضريبي</label>
 
                     <input
                         value="${escapeAttribute(client.tax_number || "")}"
@@ -3933,9 +4239,7 @@ function viewSupabaseClient(
 
                 <div class="form-group">
 
-                    <label>
-                        النشاط
-                    </label>
+                    <label>النشاط</label>
 
                     <input
                         value="${escapeAttribute(client.activity || "")}"
@@ -3947,9 +4251,7 @@ function viewSupabaseClient(
 
                 <div class="form-group">
 
-                    <label>
-                        التواصل
-                    </label>
+                    <label>التواصل</label>
 
                     <input
                         value="${escapeAttribute(client.contact || "")}"
@@ -3961,9 +4263,7 @@ function viewSupabaseClient(
 
                 <div class="form-group full">
 
-                    <label>
-                        العنوان
-                    </label>
+                    <label>العنوان</label>
 
                     <input
                         value="${escapeAttribute(client.address || "")}"
@@ -3975,9 +4275,7 @@ function viewSupabaseClient(
 
                 <div class="form-group full">
 
-                    <label>
-                        الملاحظات
-                    </label>
+                    <label>الملاحظات</label>
 
                     <textarea disabled>${escapeHTML(
                         client.notes || ""
@@ -3995,17 +4293,24 @@ function viewSupabaseClient(
                     type="button"
                     onclick="navigateToClientRequests('${escapeAttribute(client.id)}')"
                 >
+
                     <i data-lucide="clipboard-list"></i>
+
                     طلبات العميل
+
                 </button>
+
 
                 <button
                     class="btn secondary"
                     type="button"
                     onclick="navigateToClientDocuments('${escapeAttribute(client.id)}')"
                 >
+
                     <i data-lucide="files"></i>
+
                     مستندات العميل
+
                 </button>
 
             </div>
@@ -4051,7 +4356,7 @@ function navigateToClientDocuments(
 
 
 /* =========================================================
-   REQUESTS
+   REQUESTS PAGE
 ========================================================= */
 
 function renderRequestsPage() {
@@ -4072,10 +4377,11 @@ function renderRequestsPage() {
                 </h2>
 
                 <p>
-                    أضيفي الطلبات التي يجب على كل عميل رفعها.
+                    أضيفي الطلبات التي يجب على العميل رفعها.
                 </p>
 
             </div>
+
 
             <div class="page-actions">
 
@@ -4084,17 +4390,24 @@ function renderRequestsPage() {
                     type="button"
                     onclick="openRequestModal()"
                 >
+
                     <i data-lucide="plus"></i>
+
                     طلب مستند جديد
+
                 </button>
+
 
                 <button
                     class="btn secondary"
                     type="button"
-                    onclick="refreshDatabaseData(); navigate('requests')"
+                    onclick="manualRefresh('requests')"
                 >
+
                     <i data-lucide="refresh-cw"></i>
+
                     تحديث
+
                 </button>
 
             </div>
@@ -4115,6 +4428,7 @@ function renderRequestsPage() {
                 >
 
             </div>
+
 
             <div id="requestsTable"></div>
 
@@ -4170,7 +4484,7 @@ function renderRequestsTable(
         container.innerHTML =
             emptyState(
                 "لا توجد طلبات",
-                "أضيفي أول طلب مستند ليظهر عند العميل."
+                "أضيفي أول طلب مستند ليظهر لدى العميل."
             );
 
         return;
@@ -4186,101 +4500,93 @@ function renderRequestsTable(
 
                     <tr>
 
-                        <th>
-                            العميل
-                        </th>
+                        <th>العميل</th>
 
-                        <th>
-                            طلب المستند
-                        </th>
+                        <th>طلب المستند</th>
 
-                        <th>
-                            الحالة
-                        </th>
+                        <th>الحالة</th>
 
-                        <th>
-                            الأولوية
-                        </th>
+                        <th>الأولوية</th>
 
-                        <th>
-                            تاريخ الإنشاء
-                        </th>
+                        <th>تاريخ الإنشاء</th>
 
-                        <th>
-                            الإجراء
-                        </th>
+                        <th>الإجراء</th>
 
                     </tr>
 
                 </thead>
 
+
                 <tbody>
 
-                    ${list
-                        .map(
-                            request => {
+                    ${list.map(
+                        function (
+                            request
+                        ) {
 
-                                const client =
-                                    getClientById(
-                                        request.client_id
-                                    );
+                            const client =
+                                getClientById(
+                                    request.client_id
+                                );
 
-                                return `
+                            return `
 
-                                    <tr>
+                                <tr>
 
-                                        <td>
+                                    <td>
+                                        ${escapeHTML(
+                                            client?.name ||
+                                            "—"
+                                        )}
+                                    </td>
+
+                                    <td>
+
+                                        <strong>
                                             ${escapeHTML(
-                                                client?.name ||
+                                                request.title ||
                                                 "—"
                                             )}
-                                        </td>
+                                        </strong>
 
-                                        <td>
-                                            <strong>
-                                                ${escapeHTML(
-                                                    request.title ||
-                                                    "—"
-                                                )}
-                                            </strong>
-                                        </td>
+                                    </td>
 
-                                        <td>
-                                            ${requestStatusBadge(
-                                                request.status
-                                            )}
-                                        </td>
+                                    <td>
+                                        ${requestStatusBadge(
+                                            request.status
+                                        )}
+                                    </td>
 
-                                        <td>
-                                            ${priorityBadge(
-                                                request.priority
-                                            )}
-                                        </td>
+                                    <td>
+                                        ${priorityBadge(
+                                            request.priority
+                                        )}
+                                    </td>
 
-                                        <td>
-                                            ${formatSupabaseDate(
-                                                request.created_at
-                                            )}
-                                        </td>
+                                    <td>
+                                        ${formatSupabaseDate(
+                                            request.created_at
+                                        )}
+                                    </td>
 
-                                        <td>
+                                    <td>
 
-                                            <button
-                                                class="btn secondary"
-                                                type="button"
-                                                onclick="viewRequest('${escapeAttribute(request.id)}')"
-                                            >
-                                                عرض
-                                            </button>
+                                        <button
+                                            class="btn secondary"
+                                            type="button"
+                                            onclick="viewRequest('${escapeAttribute(request.id)}')"
+                                        >
 
-                                        </td>
+                                            عرض
 
-                                    </tr>
+                                        </button>
 
-                                `;
-                            }
-                        )
-                        .join("")}
+                                    </td>
+
+                                </tr>
+                            `;
+                        }
+                    ).join("")}
 
                 </tbody>
 
@@ -4309,7 +4615,9 @@ function filterRequests(
 
     const filtered =
         base.filter(
-            request => {
+            function (
+                request
+            ) {
 
                 const client =
                     getClientById(
@@ -4317,14 +4625,20 @@ function filterRequests(
                     );
 
                 return [
+
                     request.title,
                     request.description,
                     request.status,
                     client?.name
+
                 ]
+
                     .filter(Boolean)
+
                     .join(" ")
+
                     .toLowerCase()
+
                     .includes(
                         query
                     );
@@ -4336,6 +4650,10 @@ function filterRequests(
     );
 }
 
+
+/* =========================================================
+   REQUEST MODAL
+========================================================= */
 
 function openRequestModal() {
 
@@ -4387,33 +4705,30 @@ function openRequestModal() {
                                 اختر العميل
                             </option>
 
-                            ${dbClients
-                                .map(
-                                    client => `
+                            ${dbClients.map(
+                                function (
+                                    client
+                                ) {
+
+                                    return `
 
                                         <option
                                             value="${escapeAttribute(client.id)}"
                                             ${
                                                 selectedClientId &&
-                                                String(
-                                                    selectedClientId
-                                                ) ===
-                                                String(
-                                                    client.id
-                                                )
+                                                String(selectedClientId) ===
+                                                String(client.id)
                                                     ? "selected"
                                                     : ""
                                             }
                                         >
-
                                             ${escapeHTML(
                                                 client.name
                                             )}
-
                                         </option>
-                                    `
-                                )
-                                .join("")}
+                                    `;
+                                }
+                            ).join("")}
 
                         </select>
 
@@ -4489,7 +4804,6 @@ function openRequestModal() {
 
                         <textarea
                             name="description"
-                            placeholder="اكتبي تفاصيل المستند المطلوب..."
                         ></textarea>
 
                     </div>
@@ -4503,7 +4817,6 @@ function openRequestModal() {
 
                         <textarea
                             name="note"
-                            placeholder="ستظهر هذه الملاحظة للعميل..."
                         ></textarea>
 
                     </div>
@@ -4517,9 +4830,13 @@ function openRequestModal() {
                         class="btn"
                         type="submit"
                     >
+
                         <i data-lucide="send"></i>
+
                         إرسال الطلب
+
                     </button>
+
 
                     <button
                         class="btn secondary"
@@ -4562,7 +4879,10 @@ async function saveDocumentRequest(
             ""
         ).trim();
 
-    if (!clientId || !title) {
+    if (
+        !clientId ||
+        !title
+    ) {
 
         showToast(
             "بيانات ناقصة",
@@ -4642,6 +4962,11 @@ async function saveDocumentRequest(
 
     updateCounters();
 
+    addLocalNotification(
+        "طلب مستند جديد",
+        `تم إنشاء طلب مستند للعميل.`
+    );
+
     closeModal();
 
     showToast(
@@ -4707,15 +5032,12 @@ function viewRequest(
 
                 </div>
 
-
                 <div class="info-box">
 
-                    ${
-                        escapeHTML(
-                            request.description ||
-                            "لا يوجد وصف."
-                        )
-                    }
+                    ${escapeHTML(
+                        request.description ||
+                        "لا يوجد وصف."
+                    )}
 
                 </div>
 
@@ -4775,8 +5097,11 @@ function viewRequest(
                     type="button"
                     onclick="navigateToClientDocuments('${escapeAttribute(request.client_id)}')"
                 >
+
                     <i data-lucide="files"></i>
+
                     مستندات العميل
+
                 </button>
 
                 <button
@@ -4796,7 +5121,7 @@ function viewRequest(
 
 
 /* =========================================================
-   DOCUMENTS
+   DOCUMENTS PAGE
 ========================================================= */
 
 function renderDocuments() {
@@ -4813,11 +5138,19 @@ function renderDocuments() {
 
     const base =
         selectedClientId
+
             ? dbDocuments.filter(
-                doc =>
-                    String(doc.client_id) ===
-                    String(selectedClientId)
+                function (
+                    doc
+                ) {
+
+                    return (
+                        String(doc.client_id) ===
+                        String(selectedClientId)
+                    );
+                }
             )
+
             : dbDocuments;
 
     content.innerHTML = `
@@ -4836,10 +5169,12 @@ function renderDocuments() {
 
             </div>
 
+
             <div class="page-actions">
 
                 ${
                     selectedClientId
+
                         ? `
                             <button
                                 class="btn secondary"
@@ -4849,16 +5184,21 @@ function renderDocuments() {
                                 جميع العملاء
                             </button>
                         `
+
                         : ""
                 }
+
 
                 <button
                     class="btn secondary"
                     type="button"
-                    onclick="refreshDatabaseData(); navigate('documents')"
+                    onclick="manualRefresh('documents')"
                 >
+
                     <i data-lucide="refresh-cw"></i>
+
                     تحديث
+
                 </button>
 
             </div>
@@ -4879,6 +5219,7 @@ function renderDocuments() {
                 >
 
             </div>
+
 
             <div id="documentsTable"></div>
 
@@ -4908,7 +5249,8 @@ function renderDocumentsTable(
 
     if (
         !list ||
-        list.length === 0
+        list.length ===
+            0
     ) {
 
         container.innerHTML =
@@ -4930,33 +5272,19 @@ function renderDocumentsTable(
 
                     <tr>
 
-                        <th>
-                            اسم الملف
-                        </th>
+                        <th>اسم الملف</th>
 
-                        <th>
-                            العميل
-                        </th>
+                        <th>العميل</th>
 
-                        <th>
-                            طلب المستند
-                        </th>
+                        <th>طلب المستند</th>
 
-                        <th>
-                            الحالة
-                        </th>
+                        <th>الحالة</th>
 
-                        <th>
-                            الحجم
-                        </th>
+                        <th>الحجم</th>
 
-                        <th>
-                            تاريخ الرفع
-                        </th>
+                        <th>تاريخ الرفع</th>
 
-                        <th>
-                            الإجراءات
-                        </th>
+                        <th>الإجراءات</th>
 
                     </tr>
 
@@ -4965,116 +5293,125 @@ function renderDocumentsTable(
 
                 <tbody>
 
-                    ${list
-                        .map(
-                            doc => {
+                    ${list.map(
+                        function (
+                            doc
+                        ) {
 
-                                const client =
-                                    getClientById(
-                                        doc.client_id
-                                    );
+                            const client =
+                                getClientById(
+                                    doc.client_id
+                                );
 
-                                const request =
-                                    dbRequests.find(
-                                        req =>
-                                            String(
-                                                req.id
-                                            ) ===
-                                            String(
-                                                doc.request_id
-                                            )
-                                    );
+                            const request =
+                                dbRequests.find(
+                                    function (
+                                        req
+                                    ) {
 
-                                return `
+                                        return (
+                                            String(req.id) ===
+                                            String(doc.request_id)
+                                        );
+                                    }
+                                );
 
-                                    <tr>
+                            return `
 
-                                        <td>
+                                <tr>
 
-                                            <strong>
-                                                ${escapeHTML(
-                                                    doc.name ||
-                                                    "مستند"
-                                                )}
-                                            </strong>
+                                    <td>
 
-                                        </td>
-
-
-                                        <td>
+                                        <strong>
                                             ${escapeHTML(
-                                                client?.name ||
-                                                "—"
+                                                doc.name ||
+                                                "مستند"
                                             )}
-                                        </td>
+                                        </strong>
+
+                                    </td>
 
 
-                                        <td>
-                                            ${escapeHTML(
-                                                request?.title ||
-                                                "—"
-                                            )}
-                                        </td>
+                                    <td>
+                                        ${escapeHTML(
+                                            client?.name ||
+                                            "—"
+                                        )}
+                                    </td>
 
 
-                                        <td>
-                                            ${documentStatusBadge(
-                                                doc.status
-                                            )}
-                                        </td>
+                                    <td>
+                                        ${escapeHTML(
+                                            request?.title ||
+                                            "—"
+                                        )}
+                                    </td>
 
 
-                                        <td>
-                                            ${formatFileSize(
-                                                doc.file_size
-                                            )}
-                                        </td>
+                                    <td>
+                                        ${documentStatusBadge(
+                                            doc.status
+                                        )}
+                                    </td>
 
 
-                                        <td>
-                                            ${formatSupabaseDate(
-                                                doc.upload_date
-                                            )}
-                                        </td>
+                                    <td>
+                                        ${formatFileSize(
+                                            doc.file_size
+                                        )}
+                                    </td>
 
 
-                                        <td>
+                                    <td>
+                                        ${formatSupabaseDate(
+                                            doc.upload_date
+                                        )}
+                                    </td>
 
-                                            <div
-                                                style="
-                                                    display:flex;
-                                                    gap:6px;
-                                                    flex-wrap:wrap;
-                                                "
+
+                                    <td>
+
+                                        <div
+                                            style="
+                                                display:flex;
+                                                gap:6px;
+                                                flex-wrap:wrap;
+                                            "
+                                        >
+
+                                            <button
+                                                class="btn secondary"
+                                                type="button"
+                                                onclick="openAuditorDocument('${escapeAttribute(doc.id)}')"
                                             >
 
-                                                <button
-                                                    class="btn secondary"
-                                                    type="button"
-                                                    onclick="openAuditorDocument('${escapeAttribute(doc.id)}')"
-                                                >
-                                                    <i data-lucide="eye"></i>
-                                                    مراجعة
-                                                </button>
+                                                <i data-lucide="eye"></i>
 
-                                                <button
-                                                    class="btn secondary"
-                                                    type="button"
-                                                    onclick="downloadAuditorDocument('${escapeAttribute(doc.id)}')"
-                                                >
-                                                    <i data-lucide="download"></i>
-                                                    الملف
-                                                </button>
+                                                مراجعة
 
-                                            </div>
+                                            </button>
 
-                                        </td>
 
-                                    </tr>
-                                `;
-                            }
-                        )
-                        .join("")}
+                                            <button
+                                                class="btn secondary"
+                                                type="button"
+                                                onclick="downloadAuditorDocument('${escapeAttribute(doc.id)}')"
+                                            >
+
+                                                <i data-lucide="download"></i>
+
+                                                فتح الملف
+
+                                            </button>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            `;
+                        }
+                    ).join("")}
 
                 </tbody>
 
@@ -5105,16 +5442,26 @@ function filterAuditorDocuments(
 
     const base =
         selectedClientId
+
             ? dbDocuments.filter(
-                doc =>
-                    String(doc.client_id) ===
-                    String(selectedClientId)
+                function (
+                    doc
+                ) {
+
+                    return (
+                        String(doc.client_id) ===
+                        String(selectedClientId)
+                    );
+                }
             )
+
             : dbDocuments;
 
     const filtered =
         base.filter(
-            doc => {
+            function (
+                doc
+            ) {
 
                 const client =
                     getClientById(
@@ -5123,20 +5470,32 @@ function filterAuditorDocuments(
 
                 const request =
                     dbRequests.find(
-                        req =>
-                            String(req.id) ===
-                            String(doc.request_id)
+                        function (
+                            req
+                        ) {
+
+                            return (
+                                String(req.id) ===
+                                String(doc.request_id)
+                            );
+                        }
                     );
 
                 return [
+
                     doc.name,
                     client?.name,
                     request?.title,
                     doc.status
+
                 ]
+
                     .filter(Boolean)
+
                     .join(" ")
+
                     .toLowerCase()
+
                     .includes(
                         query
                     );
@@ -5165,6 +5524,12 @@ function openAuditorDocument(
         );
 
     if (!doc) {
+
+        showToast(
+            "المستند غير موجود",
+            "لم أجد هذا المستند في البيانات الحالية."
+        );
+
         return;
     }
 
@@ -5222,9 +5587,24 @@ function openAuditorDocument(
                 </div>
 
 
-                <div
-                    class="document-preview-meta"
-                >
+                <div class="info-box">
+
+                    <strong>
+                        مسار الملف:
+                    </strong>
+
+                    <br>
+
+                    ${escapeHTML(
+                        doc.file_path ||
+                        "غير موجود"
+                    )}
+
+                </div>
+
+
+                <div class="document-preview-meta">
+
                     تاريخ الرفع:
                     ${escapeHTML(
                         formatSupabaseDate(
@@ -5239,6 +5619,14 @@ function openAuditorDocument(
                         formatFileSize(
                             doc.file_size
                         )
+                    )}
+
+                    <br>
+
+                    النوع:
+                    ${escapeHTML(
+                        doc.mime_type ||
+                        "غير محدد"
                     )}
 
                 </div>
@@ -5338,18 +5726,26 @@ function openAuditorDocument(
                         class="btn"
                         type="submit"
                     >
+
                         <i data-lucide="save"></i>
+
                         حفظ المراجعة
+
                     </button>
+
 
                     <button
                         class="btn secondary"
                         type="button"
                         onclick="downloadAuditorDocument('${escapeAttribute(doc.id)}')"
                     >
+
                         <i data-lucide="download"></i>
+
                         فتح الملف
+
                     </button>
+
 
                     <button
                         class="btn secondary"
@@ -5389,7 +5785,7 @@ async function saveAuditorDocumentReview(
         String(
             form.get("status") ||
             ""
-        );
+        ).trim();
 
     const auditorNotes =
         String(
@@ -5407,88 +5803,153 @@ async function saveAuditorDocumentReview(
         return;
     }
 
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from(
-                "documents"
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("documents")
+                .update({
+
+                    status:
+                        status,
+
+                    auditor_notes:
+                        auditorNotes ||
+                        null,
+
+                    updated_at:
+                        new Date().toISOString()
+                })
+                .eq(
+                    "id",
+                    documentId
+                )
+                .select()
+                .single();
+
+        if (error) {
+
+            console.error(
+                "DOCUMENT UPDATE ERROR:",
+                error
+            );
+
+            showToast(
+                "فشل تحديث المستند",
+                error.message
+            );
+
+            return;
+        }
+
+        const index =
+            dbDocuments.findIndex(
+                item =>
+                    String(item.id) ===
+                    String(documentId)
+            );
+
+        if (index >= 0) {
+
+            dbDocuments[index] =
+                data;
+        }
+
+        const client =
+            getClientById(
+                data.client_id
+            );
+
+        addLocalNotification(
+            "تم تحديث مستند",
+            `تمت مراجعة مستند ${client?.name || "العميل"} وتحديث حالته.`
+        );
+
+        /*
+           مهم:
+           إذا كان المستند Accepted أو Revision
+           نحدث حالة الطلب كذلك.
+        */
+
+        if (
+            data.request_id &&
+            [
+                "accepted",
+                "revision"
+            ].includes(
+                status
             )
-            .update({
+        ) {
 
-                status:
-                    status,
+            const requestStatus =
+                status === "accepted"
+                    ? "accepted"
+                    : "revision";
 
-                auditor_notes:
-                    auditorNotes ||
-                    null,
+            const {
+                error:
+                    requestUpdateError
+            } =
+                await supabaseClient
+                    .from(
+                        "document_requests"
+                    )
+                    .update({
+                        status:
+                            requestStatus
+                    })
+                    .eq(
+                        "id",
+                        data.request_id
+                    )
+                    .eq(
+                        "client_id",
+                        data.client_id
+                    );
 
-                updated_at:
-                    new Date().toISOString()
-            })
-            .eq(
-                "id",
-                documentId
-            )
-            .select()
-            .single();
+            if (requestUpdateError) {
 
-    if (error) {
+                console.error(
+                    "REQUEST UPDATE ERROR:",
+                    requestUpdateError
+                );
+            }
+
+            await loadRequestsFromSupabase();
+        }
+
+        closeModal();
+
+        toast(
+            "تم حفظ المراجعة",
+            "تم تحديث حالة المستند وملاحظات المدقق."
+        );
+
+        updateCounters();
+
+        renderDocuments();
+
+    } catch (error) {
 
         console.error(
-            "DOCUMENT UPDATE ERROR:",
+            "SAVE REVIEW ERROR:",
             error
         );
 
         showToast(
-            "فشل تحديث المستند",
-            error.message
+            "خطأ",
+            error?.message ||
+            "تعذر حفظ المراجعة."
         );
-
-        return;
     }
-
-    const index =
-        dbDocuments.findIndex(
-            item =>
-                String(item.id) ===
-                String(documentId)
-        );
-
-    if (index >= 0) {
-
-        dbDocuments[index] =
-            data;
-    }
-
-    const client =
-        getClientById(
-            data.client_id
-        );
-
-    addLocalNotification(
-        "تم تحديث مستند",
-        `تمت مراجعة ${client?.name || "أحد العملاء"} وتحديث حالة المستند.`
-    );
-
-    closeModal();
-
-    toast(
-        "تم حفظ المراجعة",
-        "تم تحديث حالة المستند وملاحظات المدقق."
-    );
-
-    updateCounters();
-
-    renderPage(
-        currentPage
-    );
 }
 
 
 /* =========================================================
-   DOWNLOAD FILE
+   OPEN / DOWNLOAD FILE
 ========================================================= */
 
 async function downloadAuditorDocument(
@@ -5503,20 +5964,31 @@ async function downloadAuditorDocument(
         );
 
     if (!doc) {
+
+        showToast(
+            "لا يوجد مستند",
+            "تعذر العثور على المستند."
+        );
+
         return;
     }
 
     if (!doc.file_path) {
 
         showToast(
-            "لا يوجد ملف",
-            "هذا السجل لا يحتوي على مسار ملف."
+            "مسار الملف مفقود",
+            "السجل موجود لكن file_path فارغ."
         );
 
         return;
     }
 
     try {
+
+        showToast(
+            "جارٍ فتح الملف",
+            "يتم إنشاء رابط آمن للمستند..."
+        );
 
         const {
             data,
@@ -5551,21 +6023,34 @@ async function downloadAuditorDocument(
 
             showToast(
                 "تعذر فتح الملف",
-                "لم يتم إنشاء رابط آمن للملف."
+                "لم يتم إنشاء الرابط الآمن."
             );
 
             return;
         }
 
-        window.open(
-            data.signedUrl,
-            "_blank"
-        );
+        /*
+           نحاول فتحه في نافذة جديدة.
+           إذا منع المتصفح ذلك، ننتقل للرابط مباشرة.
+        */
+
+        const newWindow =
+            window.open(
+                data.signedUrl,
+                "_blank",
+                "noopener,noreferrer"
+            );
+
+        if (!newWindow) {
+
+            window.location.href =
+                data.signedUrl;
+        }
 
     } catch (error) {
 
         console.error(
-            "DOWNLOAD ERROR:",
+            "FILE OPEN ERROR:",
             error
         );
 
@@ -5588,29 +6073,26 @@ function documentStatusBadge(
 
     const map = {
 
-        uploaded:
-            [
-                "تم تحميل الملف",
-                "blue"
-            ],
+        uploaded: [
+            "تم تحميل الملف",
+            "blue"
+        ],
 
-        review:
-            [
-                "قيد المراجعة",
-                "orange"
-            ],
+        review: [
+            "قيد المراجعة",
+            "orange"
+        ],
 
-        accepted:
-            [
-                "مقبول",
-                "green"
-            ],
+        accepted: [
+            "مقبول",
+            "green"
+        ],
 
-        revision:
-            [
-                "يحتاج تعديل",
-                "red"
-            ]
+        revision: [
+            "يحتاج تعديل",
+            "red"
+        ]
+
     };
 
     const value =
@@ -5622,7 +6104,9 @@ function documentStatusBadge(
 
     return `
         <span class="badge ${value[1]}">
-            ${escapeHTML(value[0])}
+            ${escapeHTML(
+                value[0]
+            )}
         </span>
     `;
 }
@@ -5634,41 +6118,36 @@ function requestStatusBadge(
 
     const map = {
 
-        required:
-            [
-                "مطلوب",
-                "red"
-            ],
+        required: [
+            "مطلوب",
+            "red"
+        ],
 
-        uploaded:
-            [
-                "تم الرفع",
-                "blue"
-            ],
+        uploaded: [
+            "تم الرفع",
+            "blue"
+        ],
 
-        review:
-            [
-                "قيد المراجعة",
-                "orange"
-            ],
+        review: [
+            "قيد المراجعة",
+            "orange"
+        ],
 
-        accepted:
-            [
-                "مقبول",
-                "green"
-            ],
+        accepted: [
+            "مقبول",
+            "green"
+        ],
 
-        revision:
-            [
-                "يحتاج تعديل",
-                "red"
-            ],
+        revision: [
+            "يحتاج تعديل",
+            "red"
+        ],
 
-        additional:
-            [
-                "مطلوب إضافي",
-                "orange"
-            ]
+        additional: [
+            "مطلوب إضافي",
+            "orange"
+        ]
+
     };
 
     const value =
@@ -5680,7 +6159,9 @@ function requestStatusBadge(
 
     return `
         <span class="badge ${value[1]}">
-            ${escapeHTML(value[0])}
+            ${escapeHTML(
+                value[0]
+            )}
         </span>
     `;
 }
@@ -5690,7 +6171,10 @@ function priorityBadge(
     priority
 ) {
 
-    if (priority === "high") {
+    if (
+        priority ===
+        "high"
+    ) {
 
         return `
             <span class="badge red">
@@ -5753,10 +6237,12 @@ function renderEngagements() {
 
             ${
                 localState.engagements.length === 0
+
                     ? emptyState(
                         "لا توجد مهام",
                         "يمكن إضافة مهام التدقيق داخليًا."
                     )
+
                     : `
                         <div class="table-wrapper">
 
@@ -5765,20 +6251,39 @@ function renderEngagements() {
                                 <thead>
 
                                     <tr>
-                                        <th>رقم المهمة</th>
-                                        <th>العميل</th>
-                                        <th>السنة</th>
-                                        <th>النوع</th>
-                                        <th>الحالة</th>
+
+                                        <th>
+                                            رقم المهمة
+                                        </th>
+
+                                        <th>
+                                            العميل
+                                        </th>
+
+                                        <th>
+                                            السنة
+                                        </th>
+
+                                        <th>
+                                            النوع
+                                        </th>
+
+                                        <th>
+                                            الحالة
+                                        </th>
+
                                     </tr>
 
                                 </thead>
+
 
                                 <tbody>
 
                                     ${localState.engagements
                                         .map(
-                                            e => {
+                                            function (
+                                                e
+                                            ) {
 
                                                 const client =
                                                     getClientById(
@@ -5823,6 +6328,7 @@ function renderEngagements() {
                                                         </td>
 
                                                     </tr>
+
                                                 `;
                                             }
                                         )
@@ -5845,7 +6351,10 @@ function renderEngagements() {
 
 function openEngagementModal() {
 
-    if (dbClients.length === 0) {
+    if (
+        dbClients.length ===
+        0
+    ) {
 
         showToast(
             "لا يوجد عملاء",
@@ -5883,16 +6392,21 @@ function openEngagementModal() {
 
                             ${dbClients
                                 .map(
-                                    client => `
+                                    function (
+                                        client
+                                    ) {
 
-                                        <option
-                                            value="${escapeAttribute(client.id)}"
-                                        >
-                                            ${escapeHTML(
-                                                client.name
-                                            )}
-                                        </option>
-                                    `
+                                        return `
+
+                                            <option
+                                                value="${escapeAttribute(client.id)}"
+                                            >
+                                                ${escapeHTML(
+                                                    client.name
+                                                )}
+                                            </option>
+                                        `;
+                                    }
                                 )
                                 .join("")}
 
@@ -5959,6 +6473,8 @@ function openEngagementModal() {
             </form>
         `
     );
+
+    lucide.createIcons();
 }
 
 
@@ -5981,24 +6497,18 @@ function saveEngagement(
 
         clientId:
             String(
-                form.get(
-                    "clientId"
-                )
+                form.get("clientId")
             ),
 
         year:
             String(
-                form.get(
-                    "year"
-                ) ||
+                form.get("year") ||
                 ""
             ),
 
         type:
             String(
-                form.get(
-                    "type"
-                ) ||
+                form.get("type") ||
                 ""
             ),
 
@@ -6062,10 +6572,12 @@ function renderTransactions() {
 
             ${
                 localState.transactions.length === 0
+
                     ? emptyState(
                         "لا توجد عمليات",
                         "هذه المساحة مخصصة لإدخال بيانات العمل التحليلي."
                     )
+
                     : `
                         <div class="table-wrapper">
 
@@ -6074,50 +6586,80 @@ function renderTransactions() {
                                 <thead>
 
                                     <tr>
+
                                         <th>المرجع</th>
+
                                         <th>التاريخ</th>
+
                                         <th>الحساب</th>
+
                                         <th>الوصف</th>
+
                                         <th>المدين</th>
+
                                         <th>الدائن</th>
+
                                     </tr>
 
                                 </thead>
+
 
                                 <tbody>
 
                                     ${localState.transactions
                                         .map(
-                                            t => `
+                                            function (
+                                                t
+                                            ) {
 
-                                                <tr>
+                                                return `
 
-                                                    <td>
-                                                        ${escapeHTML(t.reference)}
-                                                    </td>
+                                                    <tr>
 
-                                                    <td>
-                                                        ${escapeHTML(t.date || "—")}
-                                                    </td>
+                                                        <td>
+                                                            ${escapeHTML(
+                                                                t.reference
+                                                            )}
+                                                        </td>
 
-                                                    <td>
-                                                        ${escapeHTML(t.account || "—")}
-                                                    </td>
+                                                        <td>
+                                                            ${escapeHTML(
+                                                                t.date ||
+                                                                "—"
+                                                            )}
+                                                        </td>
 
-                                                    <td>
-                                                        ${escapeHTML(t.description || "—")}
-                                                    </td>
+                                                        <td>
+                                                            ${escapeHTML(
+                                                                t.account ||
+                                                                "—"
+                                                            )}
+                                                        </td>
 
-                                                    <td>
-                                                        ${escapeHTML(t.debit || "—")}
-                                                    </td>
+                                                        <td>
+                                                            ${escapeHTML(
+                                                                t.description ||
+                                                                "—"
+                                                            )}
+                                                        </td>
 
-                                                    <td>
-                                                        ${escapeHTML(t.credit || "—")}
-                                                    </td>
+                                                        <td>
+                                                            ${escapeHTML(
+                                                                t.debit ||
+                                                                "—"
+                                                            )}
+                                                        </td>
 
-                                                </tr>
-                                            `
+                                                        <td>
+                                                            ${escapeHTML(
+                                                                t.credit ||
+                                                                "—"
+                                                            )}
+                                                        </td>
+
+                                                    </tr>
+                                                `;
+                                            }
                                         )
                                         .join("")}
 
@@ -6168,8 +6710,11 @@ function renderPreAudit() {
                 type="button"
                 onclick="runPreAudit()"
             >
+
                 <i data-lucide="play"></i>
+
                 تشغيل الفحص
+
             </button>
 
         </div>
@@ -6225,7 +6770,6 @@ function renderPreAudit() {
             </div>
 
         </div>
-
     `;
 
     lucide.createIcons();
@@ -6234,7 +6778,7 @@ function renderPreAudit() {
 
 function runPreAudit() {
 
-    toast(
+    showToast(
         "الفحص",
         "هذه المساحة جاهزة للفحوصات التحليلية."
     );
@@ -6277,9 +6821,11 @@ function renderWorkspace() {
                 <div>
 
                     <div class="progress">
+
                         <span
                             style="width:35%"
                         ></span>
+
                     </div>
 
                     <div class="progress-text">
@@ -6351,7 +6897,7 @@ function workspaceSection(
 
         <div
             class="audit-section glass"
-            onclick="toast('مساحة التدقيق', '${escapeAttribute(arabic)}')"
+            onclick="showToast('مساحة التدقيق', '${escapeAttribute(arabic)}')"
         >
 
             <div class="audit-section-icon">
@@ -6374,7 +6920,7 @@ function workspaceSection(
 
 
 /* =========================================================
-   OTHER PAGES - BASIC
+   OTHER PAGES
 ========================================================= */
 
 function renderTests() {
@@ -6522,7 +7068,7 @@ function renderSimplePage(
 
             ${emptyState(
                 emptyTitle,
-                "يمكننا ربط هذا القسم بقاعدة البيانات في الخطوة التالية."
+                "يمكننا ربط هذا القسم بقاعدة البيانات لاحقًا."
             )}
 
         </div>
@@ -6559,7 +7105,9 @@ function loadLocalState() {
             );
 
         localState = {
+
             ...localState,
+
             ...parsed
         };
 
@@ -6588,7 +7136,10 @@ function saveLocalState() {
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "SAVE LOCAL STATE ERROR:",
+            error
+        );
     }
 }
 
@@ -6665,32 +7216,37 @@ function renderNotifications() {
                 20
             )
             .map(
-                notification => `
+                function (
+                    notification
+                ) {
 
-                    <div class="notification-item">
+                    return `
 
-                        <strong>
-                            ${escapeHTML(
-                                notification.title
-                            )}
-                        </strong>
+                        <div class="notification-item">
 
-                        <p>
-                            ${escapeHTML(
-                                notification.message
-                            )}
-                        </p>
+                            <strong>
+                                ${escapeHTML(
+                                    notification.title
+                                )}
+                            </strong>
 
-                        <time>
-                            ${formatDateTime(
-                                new Date(
-                                    notification.timestamp
-                                )
-                            )}
-                        </time>
+                            <p>
+                                ${escapeHTML(
+                                    notification.message
+                                )}
+                            </p>
 
-                    </div>
-                `
+                            <time>
+                                ${formatDateTime(
+                                    new Date(
+                                        notification.timestamp
+                                    )
+                                )}
+                            </time>
+
+                        </div>
+                    `;
+                }
             )
             .join("");
 }
@@ -6714,14 +7270,21 @@ function setupNotificationEvents() {
                         "notificationPanel"
                     );
 
-                panel.classList.toggle(
-                    "show"
-                );
+                if (panel) {
+
+                    panel.classList.toggle(
+                        "show"
+                    );
+                }
 
                 localState.notifications.forEach(
-                    item =>
+                    function (
+                        item
+                    ) {
+
                         item.read =
-                            true
+                            true;
+                    }
                 );
 
                 saveLocalState();
@@ -6811,27 +7374,39 @@ function openModal(
     body
 ) {
 
-    document
-        .getElementById(
+    const titleElement =
+        document.getElementById(
             "modalTitle"
-        )
-        .textContent =
-        title;
+        );
 
-    document
-        .getElementById(
+    const bodyElement =
+        document.getElementById(
             "modalBody"
-        )
-        .innerHTML =
-        body;
+        );
 
-    document
-        .getElementById(
+    const overlay =
+        document.getElementById(
             "modalOverlay"
-        )
-        .classList.add(
+        );
+
+    if (titleElement) {
+
+        titleElement.textContent =
+            title;
+    }
+
+    if (bodyElement) {
+
+        bodyElement.innerHTML =
+            body;
+    }
+
+    if (overlay) {
+
+        overlay.classList.add(
             "show"
         );
+    }
 
     lucide.createIcons();
 }
@@ -6839,13 +7414,17 @@ function openModal(
 
 function closeModal() {
 
-    document
-        .getElementById(
+    const overlay =
+        document.getElementById(
             "modalOverlay"
-        )
-        .classList.remove(
+        );
+
+    if (overlay) {
+
+        overlay.classList.remove(
             "show"
         );
+    }
 }
 
 
@@ -6868,13 +7447,17 @@ function setupMobileMenu() {
         "click",
         function () {
 
-            document
-                .getElementById(
+            const sidebar =
+                document.getElementById(
                     "sidebar"
-                )
-                .classList.toggle(
+                );
+
+            if (sidebar) {
+
+                sidebar.classList.toggle(
                     "open"
                 );
+            }
         }
     );
 }
@@ -6889,9 +7472,15 @@ function getClientById(
 ) {
 
     return dbClients.find(
-        client =>
-            String(client.id) ===
-            String(id)
+        function (
+            client
+        ) {
+
+            return (
+                String(client.id) ===
+                String(id)
+            );
+        }
     );
 }
 
@@ -7001,9 +7590,7 @@ function formatSupabaseDate(
                     "2-digit"
             }
         ).format(
-            new Date(
-                value
-            )
+            new Date(value)
         );
 
     } catch (error) {
@@ -7052,14 +7639,21 @@ function formatFileSize(
             bytes || 0
         );
 
-    if (value === 0) {
+    if (
+        value ===
+        0
+    ) {
+
         return "0 KB";
     }
 
     const kb =
         value / 1024;
 
-    if (kb < 1024) {
+    if (
+        kb <
+        1024
+    ) {
 
         return `${kb.toFixed(1)} KB`;
     }
@@ -7122,8 +7716,10 @@ function showToast(
                 "translateX(-20px)";
 
             setTimeout(
-                () => {
+                function () {
+
                     element.remove();
+
                 },
                 250
             );
@@ -7147,7 +7743,7 @@ function toast(
 
 
 /* =========================================================
-   SUPABASE AUTH EVENTS
+   AUTH STATE
 ========================================================= */
 
 supabaseClient.auth.onAuthStateChange(
@@ -7172,51 +7768,68 @@ supabaseClient.auth.onAuthStateChange(
             currentRole =
                 null;
 
-            document
-                .getElementById(
+            dbClients =
+                [];
+
+            dbRequests =
+                [];
+
+            dbDocuments =
+                [];
+
+            if (realtimeChannel) {
+
+                try {
+
+                    await supabaseClient
+                        .removeChannel(
+                            realtimeChannel
+                        );
+
+                } catch (
+                    channelError
+                ) {
+
+                    console.error(
+                        channelError
+                    );
+                }
+
+                realtimeChannel =
+                    null;
+            }
+
+            const portal =
+                document.getElementById(
                     "portalScreen"
-                )
-                .classList.add(
-                    "hidden"
                 );
 
-            document
-                .getElementById(
+            const login =
+                document.getElementById(
                     "loginScreen"
-                )
-                .classList.remove(
+                );
+
+            if (portal) {
+
+                portal.classList.add(
                     "hidden"
                 );
+            }
+
+            if (login) {
+
+                login.classList.remove(
+                    "hidden"
+                );
+            }
 
             setSystemStatus(
                 false,
                 "تم تسجيل الخروج"
             );
         }
-
-        if (
-            event ===
-                "SIGNED_IN" &&
-            session?.user
-        ) {
-
-            /*
-               يتم التعامل مع الدخول
-               من خلال completeAuditorLogin
-            */
-        }
     }
 );
-
-
-/* =========================================================
-   INITIAL LOAD
-========================================================= */
-
-loadLocalState();
-
-updateCounters();
-
 </script>
 </body>
 </html>
