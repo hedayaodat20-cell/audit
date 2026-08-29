@@ -1972,7 +1972,7 @@
         id="toastContainer"
     ></div>
 
-
+```html
 <script>
 /* =========================================================
    SUPABASE CONFIGURATION
@@ -1981,9 +1981,6 @@
 const SUPABASE_URL =
     "https://wwybebjrddamormylzem.supabase.co";
 
-/*
-   ضعي هنا Publishable Key الخاص بمشروع Supabase
-*/
 const SUPABASE_KEY =
     "sb_publishable_r6Pl1Cr0_wypoL1H93lt_g_-BBj_6_u";
 
@@ -1995,6 +1992,11 @@ if (
         "Supabase Publishable Key is missing."
     );
 }
+
+
+/* =========================================================
+   SUPABASE CLIENT
+========================================================= */
 
 const supabaseClient =
     window.supabase.createClient(
@@ -2155,7 +2157,8 @@ document.addEventListener(
 
             if (
                 !SUPABASE_KEY ||
-                SUPABASE_KEY === "ضعي_هنا_PUBLISHABLE_KEY"
+                SUPABASE_KEY ===
+                    "ضعي_هنا_PUBLISHABLE_KEY"
             ) {
 
                 setSystemStatus(
@@ -2600,16 +2603,7 @@ async function handleLogout() {
 
     try {
 
-        if (realtimeChannel) {
-
-            await supabaseClient
-                .removeChannel(
-                    realtimeChannel
-                );
-
-            realtimeChannel =
-                null;
-        }
+        await stopRealtime();
 
         const {
             error
@@ -2890,24 +2884,28 @@ async function loadDocumentsFromSupabase() {
    REALTIME
 ========================================================= */
 
-function setupRealtimeUpdates() {
+async function setupRealtimeUpdates() {
 
-    if (realtimeChannel) {
+    await stopRealtime();
 
-        supabaseClient
-            .removeChannel(
-                realtimeChannel
-            );
+    if (!currentUser?.id) {
 
-        realtimeChannel =
-            null;
+        console.warn(
+            "REALTIME NOT STARTED: USER MISSING"
+        );
+
+        return;
     }
 
     realtimeChannel =
         supabaseClient
             .channel(
-                "audit-portal-live"
+                `audit-portal-live-${currentUser.id}-${Date.now()}`
             )
+
+            /* =================================================
+               CLIENTS
+            ================================================= */
 
             .on(
                 "postgres_changes",
@@ -2916,21 +2914,48 @@ function setupRealtimeUpdates() {
                     schema: "public",
                     table: "clients"
                 },
-                async function () {
+                async function (payload) {
 
-                    await loadClientsFromSupabase();
+                    console.log(
+                        "CLIENT REALTIME EVENT:",
+                        payload
+                    );
 
-                    updateCounters();
+                    try {
 
-                    if (
-                        currentPage ===
-                        "clients"
-                    ) {
+                        await loadClientsFromSupabase();
 
-                        renderClients();
+                        updateCounters();
+
+                        if (
+                            currentPage ===
+                            "clients"
+                        ) {
+
+                            renderClients();
+                        }
+
+                        if (
+                            currentPage ===
+                            "dashboard"
+                        ) {
+
+                            renderDashboard();
+                        }
+
+                    } catch (error) {
+
+                        console.error(
+                            "CLIENT REALTIME ERROR:",
+                            error
+                        );
                     }
                 }
             )
+
+            /* =================================================
+               DOCUMENT REQUESTS
+            ================================================= */
 
             .on(
                 "postgres_changes",
@@ -2939,29 +2964,139 @@ function setupRealtimeUpdates() {
                     schema: "public",
                     table: "document_requests"
                 },
-                async function () {
+                async function (payload) {
 
-                    await loadRequestsFromSupabase();
+                    console.log(
+                        "REQUEST REALTIME EVENT:",
+                        payload
+                    );
 
-                    updateCounters();
+                    try {
 
-                    if (
-                        currentPage ===
-                        "requests"
-                    ) {
+                        await loadRequestsFromSupabase();
 
-                        renderRequestsPage();
-                    }
+                        updateCounters();
 
-                    if (
-                        currentPage ===
-                        "documents"
-                    ) {
+                        if (
+                            currentPage ===
+                            "requests"
+                        ) {
 
-                        renderDocuments();
+                            renderRequestsPage();
+                        }
+
+                        if (
+                            currentPage ===
+                            "documents"
+                        ) {
+
+                            renderDocuments();
+                        }
+
+                        if (
+                            currentPage ===
+                            "dashboard"
+                        ) {
+
+                            renderDashboard();
+                        }
+
+                        /* ==========================
+                           INSERT
+                        ========================== */
+
+                        if (
+                            payload.eventType ===
+                            "INSERT"
+                        ) {
+
+                            const client =
+                                getClientById(
+                                    payload.new?.client_id
+                                );
+
+                            const clientName =
+                                client?.name ||
+                                "أحد العملاء";
+
+                            addLocalNotification(
+                                "طلب مستند جديد",
+                                `تم إنشاء طلب مستند جديد للعميل ${clientName}.`
+                            );
+
+                            showToast(
+                                "طلب مستند جديد",
+                                `تمت إضافة طلب جديد للعميل ${clientName}.`
+                            );
+                        }
+
+                        /* ==========================
+                           UPDATE
+                        ========================== */
+
+                        if (
+                            payload.eventType ===
+                            "UPDATE"
+                        ) {
+
+                            const statusText =
+                                getRequestStatusText(
+                                    payload.new?.status
+                                );
+
+                            const client =
+                                getClientById(
+                                    payload.new?.client_id
+                                );
+
+                            const clientName =
+                                client?.name ||
+                                "العميل";
+
+                            addLocalNotification(
+                                "تحديث طلب مستند",
+                                `تم تحديث طلب ${payload.new?.title || "المستند"} للعميل ${clientName} إلى: ${statusText}.`
+                            );
+
+                            showToast(
+                                "تحديث طلب مستند",
+                                `الحالة الحالية: ${statusText}`
+                            );
+                        }
+
+                        /* ==========================
+                           DELETE
+                        ========================== */
+
+                        if (
+                            payload.eventType ===
+                            "DELETE"
+                        ) {
+
+                            addLocalNotification(
+                                "حذف طلب مستند",
+                                "تم حذف أحد طلبات المستندات."
+                            );
+
+                            showToast(
+                                "حذف طلب",
+                                "تم حذف أحد طلبات المستندات."
+                            );
+                        }
+
+                    } catch (error) {
+
+                        console.error(
+                            "REQUEST REALTIME HANDLER ERROR:",
+                            error
+                        );
                     }
                 }
             )
+
+            /* =================================================
+               DOCUMENTS
+            ================================================= */
 
             .on(
                 "postgres_changes",
@@ -2977,51 +3112,310 @@ function setupRealtimeUpdates() {
                         payload
                     );
 
-                    await loadDocumentsFromSupabase();
+                    try {
 
-                    updateCounters();
+                        await Promise.all([
+                            loadDocumentsFromSupabase(),
+                            loadRequestsFromSupabase()
+                        ]);
 
-                    renderDocuments();
+                        updateCounters();
 
-                    if (
-                        currentPage ===
-                        "dashboard"
-                    ) {
+                        if (
+                            currentPage ===
+                            "documents"
+                        ) {
 
-                        renderDashboard();
-                    }
+                            renderDocuments();
+                        }
 
-                    /*
-                       إشعار محلي فقط عند الرفع الجديد
-                    */
+                        if (
+                            currentPage ===
+                            "requests"
+                        ) {
 
-                    if (
-                        payload.eventType ===
-                        "INSERT"
-                    ) {
+                            renderRequestsPage();
+                        }
 
-                        const client =
-                            getClientById(
-                                payload.new?.client_id
+                        if (
+                            currentPage ===
+                            "dashboard"
+                        ) {
+
+                            renderDashboard();
+                        }
+
+                        /* ==========================
+                           INSERT
+                        ========================== */
+
+                        if (
+                            payload.eventType ===
+                            "INSERT"
+                        ) {
+
+                            const client =
+                                getClientById(
+                                    payload.new?.client_id
+                                );
+
+                            const clientName =
+                                client?.name ||
+                                "أحد العملاء";
+
+                            const fileName =
+                                payload.new?.name ||
+                                "مستند";
+
+                            addLocalNotification(
+                                "مستند جديد",
+                                `قام ${clientName} برفع المستند "${fileName}".`
                             );
 
-                        addLocalNotification(
-                            "مستند جديد",
-                            `تم رفع مستند جديد من ${client?.name || "أحد العملاء"}.`
+                            showToast(
+                                "📄 مستند جديد",
+                                `تم رفع "${fileName}" من ${clientName}.`
+                            );
+                        }
+
+                        /* ==========================
+                           UPDATE
+                        ========================== */
+
+                        if (
+                            payload.eventType ===
+                            "UPDATE"
+                        ) {
+
+                            const statusText =
+                                getDocumentStatusText(
+                                    payload.new?.status
+                                );
+
+                            const client =
+                                getClientById(
+                                    payload.new?.client_id
+                                );
+
+                            const clientName =
+                                client?.name ||
+                                "العميل";
+
+                            const fileName =
+                                payload.new?.name ||
+                                "المستند";
+
+                            addLocalNotification(
+                                "تحديث مستند",
+                                `تم تحديث "${fileName}" للعميل ${clientName} إلى حالة: ${statusText}.`
+                            );
+
+                            showToast(
+                                "تحديث المستند",
+                                `أصبحت حالة "${fileName}": ${statusText}`
+                            );
+                        }
+
+                        /* ==========================
+                           DELETE
+                        ========================== */
+
+                        if (
+                            payload.eventType ===
+                            "DELETE"
+                        ) {
+
+                            addLocalNotification(
+                                "حذف مستند",
+                                "تم حذف أحد المستندات من النظام."
+                            );
+
+                            showToast(
+                                "حذف مستند",
+                                "تم حذف أحد المستندات."
+                            );
+                        }
+
+                    } catch (error) {
+
+                        console.error(
+                            "DOCUMENT REALTIME HANDLER ERROR:",
+                            error
                         );
                     }
                 }
             )
 
             .subscribe(
-                function (status) {
+                function (
+                    status
+                ) {
 
                     console.log(
                         "REALTIME STATUS:",
                         status
                     );
+
+                    if (
+                        status ===
+                        "SUBSCRIBED"
+                    ) {
+
+                        setSystemStatus(
+                            true,
+                            currentRole === "admin"
+                                ? "متصل • مدير • تحديث مباشر"
+                                : "متصل • مدقق • تحديث مباشر"
+                        );
+
+                        console.log(
+                            "✅ REALTIME CONNECTED"
+                        );
+                    }
+
+                    if (
+                        status ===
+                        "CHANNEL_ERROR"
+                    ) {
+
+                        setSystemStatus(
+                            false,
+                            "خطأ في التحديث المباشر"
+                        );
+
+                        console.error(
+                            "❌ REALTIME CHANNEL ERROR"
+                        );
+                    }
+
+                    if (
+                        status ===
+                        "TIMED_OUT"
+                    ) {
+
+                        setSystemStatus(
+                            false,
+                            "انتهت مهلة التحديث المباشر"
+                        );
+
+                        console.error(
+                            "❌ REALTIME TIMED OUT"
+                        );
+                    }
+
+                    if (
+                        status ===
+                        "CLOSED"
+                    ) {
+
+                        console.warn(
+                            "⚠️ REALTIME CLOSED"
+                        );
+                    }
                 }
             );
+}
+
+
+/* =========================================================
+   STOP REALTIME
+========================================================= */
+
+async function stopRealtime() {
+
+    try {
+
+        if (
+            realtimeChannel
+        ) {
+
+            await supabaseClient
+                .removeChannel(
+                    realtimeChannel
+                );
+
+            realtimeChannel =
+                null;
+        }
+
+        console.log(
+            "REALTIME CHANNEL STOPPED"
+        );
+
+    } catch (error) {
+
+        console.error(
+            "STOP REALTIME ERROR:",
+            error
+        );
+
+        realtimeChannel =
+            null;
+    }
+}
+
+
+/* =========================================================
+   STATUS TEXT HELPERS
+========================================================= */
+
+function getDocumentStatusText(
+    status
+) {
+
+    const statuses = {
+
+        uploaded:
+            "تم تحميل الملف",
+
+        review:
+            "قيد المراجعة",
+
+        accepted:
+            "مقبول",
+
+        revision:
+            "يحتاج تعديل"
+    };
+
+    return (
+        statuses[status] ||
+        status ||
+        "غير محددة"
+    );
+}
+
+
+function getRequestStatusText(
+    status
+) {
+
+    const statuses = {
+
+        required:
+            "مطلوب",
+
+        uploaded:
+            "تم تحميل الملف",
+
+        review:
+            "قيد المراجعة",
+
+        accepted:
+            "مقبول",
+
+        revision:
+            "يحتاج تعديل",
+
+        additional:
+            "مطلوب مستند إضافي"
+    };
+
+    return (
+        statuses[status] ||
+        status ||
+        "غير محددة"
+    );
 }
 
 
@@ -3111,7 +3505,9 @@ function setupNavigation() {
             ".nav-item[data-page]"
         )
         .forEach(
-            function (button) {
+            function (
+                button
+            ) {
 
                 button.addEventListener(
                     "click",
@@ -3139,7 +3535,9 @@ function navigate(
             ".nav-item[data-page]"
         )
         .forEach(
-            function (item) {
+            function (
+                item
+            ) {
 
                 item.classList.toggle(
                     "active",
@@ -3538,6 +3936,7 @@ function renderDashboard() {
                                             </time>
 
                                         </div>
+
                                     `;
                                 }
                             )
@@ -3596,6 +3995,10 @@ function renderClients() {
         document.getElementById(
             "content"
         );
+
+    if (!content) {
+        return;
+    }
 
     content.innerHTML = `
 
@@ -3680,8 +4083,8 @@ async function manualRefresh(
     setSystemStatus(
         true,
         currentRole === "admin"
-            ? "متصل • مدير"
-            : "متصل • مدقق"
+            ? "متصل • مدير • تحديث مباشر"
+            : "متصل • مدقق • تحديث مباشر"
     );
 
     navigate(
@@ -4962,11 +5365,6 @@ async function saveDocumentRequest(
 
     updateCounters();
 
-    addLocalNotification(
-        "طلب مستند جديد",
-        `تم إنشاء طلب مستند للعميل.`
-    );
-
     closeModal();
 
     showToast(
@@ -5868,12 +6266,6 @@ async function saveAuditorDocumentReview(
             `تمت مراجعة مستند ${client?.name || "العميل"} وتحديث حالته.`
         );
 
-        /*
-           مهم:
-           إذا كان المستند Accepted أو Revision
-           نحدث حالة الطلب كذلك.
-        */
-
         if (
             data.request_id &&
             [
@@ -5898,8 +6290,10 @@ async function saveAuditorDocumentReview(
                         "document_requests"
                     )
                     .update({
+
                         status:
                             requestStatus
+
                     })
                     .eq(
                         "id",
@@ -5915,6 +6309,11 @@ async function saveAuditorDocumentReview(
                 console.error(
                     "REQUEST UPDATE ERROR:",
                     requestUpdateError
+                );
+
+                showToast(
+                    "تم تحديث المستند",
+                    "لكن تعذر تحديث حالة طلب المستند."
                 );
             }
 
@@ -6028,11 +6427,6 @@ async function downloadAuditorDocument(
 
             return;
         }
-
-        /*
-           نحاول فتحه في نافذة جديدة.
-           إذا منع المتصفح ذلك، ننتقل للرابط مباشرة.
-        */
 
         const newWindow =
             window.open(
@@ -7181,6 +7575,8 @@ function addLocalNotification(
     saveLocalState();
 
     renderNotifications();
+
+    updateCounters();
 }
 
 
@@ -7313,6 +7709,8 @@ function setupNotificationEvents() {
                 saveLocalState();
 
                 renderNotifications();
+
+                updateCounters();
 
                 toast(
                     "تم المسح",
@@ -7590,7 +7988,9 @@ function formatSupabaseDate(
                     "2-digit"
             }
         ).format(
-            new Date(value)
+            new Date(
+                value
+            )
         );
 
     } catch (error) {
@@ -7743,7 +8143,7 @@ function toast(
 
 
 /* =========================================================
-   AUTH STATE
+   SUPABASE AUTH STATE
 ========================================================= */
 
 supabaseClient.auth.onAuthStateChange(
@@ -7762,6 +8162,8 @@ supabaseClient.auth.onAuthStateChange(
             "SIGNED_OUT"
         ) {
 
+            await stopRealtime();
+
             currentUser =
                 null;
 
@@ -7776,28 +8178,6 @@ supabaseClient.auth.onAuthStateChange(
 
             dbDocuments =
                 [];
-
-            if (realtimeChannel) {
-
-                try {
-
-                    await supabaseClient
-                        .removeChannel(
-                            realtimeChannel
-                        );
-
-                } catch (
-                    channelError
-                ) {
-
-                    console.error(
-                        channelError
-                    );
-                }
-
-                realtimeChannel =
-                    null;
-            }
 
             const portal =
                 document.getElementById(
@@ -7828,8 +8208,39 @@ supabaseClient.auth.onAuthStateChange(
                 "تم تسجيل الخروج"
             );
         }
+
+        if (
+            event ===
+            "TOKEN_REFRESHED"
+        ) {
+
+            console.log(
+                "✅ SESSION TOKEN REFRESHED"
+            );
+        }
+
+        if (
+            event ===
+            "USER_UPDATED"
+        ) {
+
+            console.log(
+                "✅ USER UPDATED"
+            );
+        }
     }
 );
+
+
+/* =========================================================
+   INITIAL LOCAL STATE
+========================================================= */
+
+loadLocalState();
+
+updateCounters();
+
+renderNotifications();
 </script>
 </body>
 </html>
