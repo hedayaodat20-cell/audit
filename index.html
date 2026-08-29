@@ -1673,39 +1673,6 @@
 
                     <button
                         class="nav-item"
-                        data-page="transactions"
-                    >
-                        <i data-lucide="list"></i>
-                        البيانات والعمليات
-                        <span
-                            class="nav-count"
-                            id="transactionsCount"
-                        >0</span>
-                    </button>
-
-
-                    <div class="nav-section">
-                        إجراءات التدقيق
-                    </div>
-
-                    <button
-                        class="nav-item"
-                        data-page="preaudit"
-                    >
-                        <i data-lucide="cpu"></i>
-                        الفحص الآلي
-                    </button>
-
-                    <button
-                        class="nav-item"
-                        data-page="workspace"
-                    >
-                        <i data-lucide="folder-kanban"></i>
-                        مساحة التدقيق
-                    </button>
-
-                    <button
-                        class="nav-item"
                         data-page="tests"
                     >
                         <i data-lucide="check-square"></i>
@@ -1718,14 +1685,6 @@
 
                     <button
                         class="nav-item"
-                        data-page="samples"
-                    >
-                        <i data-lucide="grid"></i>
-                        العينات
-                    </button>
-
-                    <button
-                        class="nav-item"
                         data-page="exceptions"
                     >
                         <i data-lucide="alert-triangle"></i>
@@ -1734,47 +1693,6 @@
                             class="nav-count"
                             id="exceptionsCount"
                         >0</span>
-                    </button>
-
-                    <button
-                        class="nav-item"
-                        data-page="inquiries"
-                    >
-                        <i data-lucide="help-circle"></i>
-                        الاستفسارات
-                        <span
-                            class="nav-count"
-                            id="inquiriesCount"
-                        >0</span>
-                    </button>
-
-
-                    <div class="nav-section">
-                        التقارير والإغلاق
-                    </div>
-
-                    <button
-                        class="nav-item"
-                        data-page="workingpapers"
-                    >
-                        <i data-lucide="file-check"></i>
-                        أوراق العمل
-                    </button>
-
-                    <button
-                        class="nav-item"
-                        data-page="analytical"
-                    >
-                        <i data-lucide="trending-up"></i>
-                        المراجعة التحليلية
-                    </button>
-
-                    <button
-                        class="nav-item"
-                        data-page="review"
-                    >
-                        <i data-lucide="shield-alert"></i>
-                        المراجعة الداخلية
                     </button>
 
                     <button
@@ -1801,7 +1719,23 @@
                         سجل التدقيق
                     </button>
 
-                </nav>
+                
+                    <div class="nav-section">إجراءات التدقيق</div>
+
+                    <button class="nav-item" data-page="preaudit">
+                        <i data-lucide="cpu"></i>
+                        الفحص الآلي
+                    </button>
+
+                    <div class="nav-section">التواصل مع العملاء</div>
+
+                    <button class="nav-item" data-page="clientmessages">
+                        <i data-lucide="message-circle"></i>
+                        رسائل العملاء
+                        <span class="nav-count" id="clientMessagesCount">0</span>
+                    </button>
+
+</nav>
 
 
                 <div class="sidebar-footer">
@@ -2019,17 +1953,13 @@ let dbDocuments = [];
 
 let localState = {
     engagements: [],
-    transactions: [],
     tests: [],
-    samples: [],
     exceptions: [],
-    inquiries: [],
-    workingPapers: [],
-    analyticalReviews: [],
     reports: [],
     archive: [],
     auditTrail: [],
-    notifications: []
+    notifications: [],
+    inquiryMessages: []
 };
 
 let realtimeChannel = null;
@@ -2066,54 +1996,14 @@ const pageInfo = {
         "إدارة المستندات المرفوعة ومراجعتها"
     ],
 
-    transactions: [
-        "البيانات والعمليات",
-        "البيانات المحاسبية والعمليات"
-    ],
-
-    preaudit: [
-        "الفحص الآلي",
-        "الفحص الأولي والاستثناءات الآلية"
-    ],
-
-    workspace: [
-        "مساحة التدقيق",
-        "بيئة العمل الخاصة بالمهمة"
-    ],
-
     tests: [
         "الاختبارات",
         "إجراءات واختبارات التدقيق"
     ],
 
-    samples: [
-        "العينات",
-        "إدارة عينات التدقيق"
-    ],
-
     exceptions: [
         "الاستثناءات",
         "إدارة الاستثناءات والمخاطر"
-    ],
-
-    inquiries: [
-        "الاستفسارات",
-        "طلبات التوضيح والتواصل مع العميل"
-    ],
-
-    workingpapers: [
-        "أوراق العمل",
-        "Electronic Working Papers"
-    ],
-
-    analytical: [
-        "المراجعة التحليلية",
-        "تحليل الفروقات والاتجاهات"
-    ],
-
-    review: [
-        "المراجعة الداخلية",
-        "مراجعة واعتماد أعمال التدقيق"
     ],
 
     reports: [
@@ -2126,7 +2016,18 @@ const pageInfo = {
         "الملفات المغلقة والمؤرشفة"
     ],
 
-    audittrail: [
+    
+    preaudit: [
+        "الفحص الآلي",
+        "الفحص الأولي والاستثناءات الآلية"
+    ],
+
+    clientmessages: [
+        "رسائل العملاء",
+        "محادثات واستفسارات العملاء"
+    ],
+
+audittrail: [
         "سجل التدقيق",
         "سجل العمليات والتغييرات"
     ]
@@ -3439,17 +3340,12 @@ function updateCounters() {
         documentsCount:
             dbDocuments.length,
 
-        transactionsCount:
-            localState.transactions.length,
-
         testsCount:
             localState.tests.length,
 
         exceptionsCount:
             localState.exceptions.length,
 
-        inquiriesCount:
-            localState.inquiries.length
     };
 
     Object
@@ -3476,10 +3372,31 @@ function updateCounters() {
         );
 
     const unread =
-        localState.notifications.filter(
-            item =>
-                !item.read
+        (Array.isArray(localState.notifications)
+            ? localState.notifications
+            : []
+        ).filter(
+            item => !item.read
         ).length;
+
+    const unreadClientMessages =
+        (localState.inquiryMessages || [])
+            .filter(
+                item =>
+                    item.sender === "client" &&
+                    !item.read
+            )
+            .length;
+
+    const messagesBadge =
+        document.getElementById(
+            "clientMessagesCount"
+        );
+
+    if (messagesBadge) {
+        messagesBadge.textContent =
+            unreadClientMessages;
+    }
 
     const badge =
         document.getElementById(
@@ -3614,35 +3531,11 @@ function renderPage(
         documents:
             renderDocuments,
 
-        transactions:
-            renderTransactions,
-
-        preaudit:
-            renderPreAudit,
-
-        workspace:
-            renderWorkspace,
-
         tests:
             renderTests,
 
-        samples:
-            renderSamples,
-
         exceptions:
             renderExceptions,
-
-        inquiries:
-            renderInquiries,
-
-        workingpapers:
-            renderWorkingPapers,
-
-        analytical:
-            renderAnalytical,
-
-        review:
-            renderReview,
 
         reports:
             renderReports,
@@ -3650,7 +3543,14 @@ function renderPage(
         archive:
             renderArchive,
 
-        audittrail:
+        
+        preaudit:
+            renderPreAudit,
+
+        clientmessages:
+            renderClientMessages,
+
+audittrail:
             renderAuditTrail
     };
 
@@ -4292,11 +4192,9 @@ function openClientModal() {
         "إضافة ملف عميل",
         `
             <div class="info-box mb-4">
-
-                حساب العميل يجب أن يكون موجودًا
-                في Authentication → Users أولًا،
-                ثم يوضع User ID لربط الملف.
-
+                أدخلي بيانات العميل فقط.
+                سيتم إنشاء حساب الدخول وUser ID وكلمة مرور مؤقتة آمنة تلقائيًا،
+                ثم ربط الحساب بملف العميل مباشرة.
             </div>
 
             <form
@@ -4307,7 +4205,6 @@ function openClientModal() {
                 <div class="form-grid">
 
                     <div class="form-group full">
-
                         <label>
                             اسم الشركة / العميل *
                         </label>
@@ -4315,41 +4212,24 @@ function openClientModal() {
                         <input
                             name="name"
                             required
+                            placeholder="اسم الشركة أو العميل"
                         >
-
                     </div>
 
-
-                    <div class="form-group">
-
+                    <div class="form-group full">
                         <label>
-                            User ID
-                        </label>
-
-                        <input
-                            name="user_id"
-                            placeholder="UUID"
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            البريد الإلكتروني
+                            البريد الإلكتروني *
                         </label>
 
                         <input
                             name="email"
                             type="email"
+                            required
+                            placeholder="client@example.com"
                         >
-
                     </div>
 
-
                     <div class="form-group">
-
                         <label>
                             الرقم الضريبي
                         </label>
@@ -4357,12 +4237,9 @@ function openClientModal() {
                         <input
                             name="tax_number"
                         >
-
                     </div>
 
-
                     <div class="form-group">
-
                         <label>
                             النشاط
                         </label>
@@ -4370,12 +4247,9 @@ function openClientModal() {
                         <input
                             name="activity"
                         >
-
                     </div>
 
-
                     <div class="form-group">
-
                         <label>
                             التواصل
                         </label>
@@ -4383,12 +4257,9 @@ function openClientModal() {
                         <input
                             name="contact"
                         >
-
                     </div>
 
-
                     <div class="form-group">
-
                         <label>
                             العنوان
                         </label>
@@ -4396,12 +4267,9 @@ function openClientModal() {
                         <input
                             name="address"
                         >
-
                     </div>
 
-
                     <div class="form-group full">
-
                         <label>
                             ملاحظات
                         </label>
@@ -4409,19 +4277,24 @@ function openClientModal() {
                         <textarea
                             name="notes"
                         ></textarea>
-
                     </div>
 
                 </div>
 
+                <div class="info-box mt-4">
+                    كلمة المرور ستُولّد تلقائيًا بطريقة آمنة، ولن تحتاجي لإدخالها يدويًا.
+                    بعد الإنشاء سنعرضها مرة واحدة لتسليمها للعميل.
+                </div>
 
                 <div class="modal-actions">
 
                     <button
                         class="btn"
                         type="submit"
+                        id="saveClientButton"
                     >
-                        حفظ العميل
+                        <i data-lucide="user-plus"></i>
+                        إنشاء حساب العميل
                     </button>
 
                     <button
@@ -4453,117 +4326,420 @@ async function saveSupabaseClient(
             event.target
         );
 
-    const payload = {
+    const name =
+        String(
+            form.get("name") || ""
+        ).trim();
 
-        name:
-            String(
-                form.get("name") ||
-                ""
-            ).trim(),
+    const email =
+        String(
+            form.get("email") || ""
+        ).trim()
+        .toLowerCase();
 
-        user_id:
-            String(
-                form.get("user_id") ||
-                ""
-            ).trim() ||
-            null,
-
-        email:
-            String(
-                form.get("email") ||
-                ""
-            ).trim() ||
-            null,
-
-        tax_number:
-            String(
-                form.get("tax_number") ||
-                ""
-            ).trim() ||
-            null,
-
-        activity:
-            String(
-                form.get("activity") ||
-                ""
-            ).trim() ||
-            null,
-
-        contact:
-            String(
-                form.get("contact") ||
-                ""
-            ).trim() ||
-            null,
-
-        address:
-            String(
-                form.get("address") ||
-                ""
-            ).trim() ||
-            null,
-
-        notes:
-            String(
-                form.get("notes") ||
-                ""
-            ).trim() ||
-            null
-    };
-
-    if (!payload.name) {
+    if (!name || !email) {
 
         showToast(
             "بيانات ناقصة",
-            "اكتبي اسم العميل."
+            "أدخلي اسم العميل والبريد الإلكتروني."
         );
 
         return;
     }
 
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("clients")
-            .insert(
-                payload
-            )
-            .select()
-            .single();
+    /*
+       توليد كلمة مرور مؤقتة قوية تلقائيًا
+       باستخدام Web Crypto API
+    */
+    function generateSecurePassword(length = 18) {
 
-    if (error) {
+        const lower =
+            "abcdefghijkmnopqrstuvwxyz";
+
+        const upper =
+            "ABCDEFGHJKLMNPQRSTUVWXYZ";
+
+        const numbers =
+            "23456789";
+
+        const symbols =
+            "!@#$%^&*_-+=";
+
+        const all =
+            lower +
+            upper +
+            numbers +
+            symbols;
+
+        const randomBytes =
+            new Uint32Array(length);
+
+        crypto.getRandomValues(
+            randomBytes
+        );
+
+        const passwordChars = [
+            lower[randomBytes[0] % lower.length],
+            upper[randomBytes[1] % upper.length],
+            numbers[randomBytes[2] % numbers.length],
+            symbols[randomBytes[3] % symbols.length]
+        ];
+
+        for (
+            let i = 4;
+            i < length;
+            i++
+        ) {
+
+            passwordChars.push(
+                all[randomBytes[i] % all.length]
+            );
+        }
+
+        /*
+           خلط بسيط حتى لا تكون أول 4 محارف دائمًا بنفس الترتيب
+        */
+        for (
+            let i = passwordChars.length - 1;
+            i > 0;
+            i--
+        ) {
+
+            const j =
+                randomBytes[i % randomBytes.length] %
+                (i + 1);
+
+            [
+                passwordChars[i],
+                passwordChars[j]
+            ] = [
+                passwordChars[j],
+                passwordChars[i]
+            ];
+        }
+
+        return passwordChars.join("");
+    }
+
+    const temporaryPassword =
+        generateSecurePassword();
+
+    const saveButton =
+        document.getElementById(
+            "saveClientButton"
+        );
+
+    try {
+
+        if (saveButton) {
+
+            saveButton.disabled =
+                true;
+
+            saveButton.innerHTML = `
+                <i data-lucide="loader-circle" class="animate-spin"></i>
+                جارٍ إنشاء حساب العميل...
+            `;
+
+            lucide.createIcons();
+        }
+
+        setSystemStatus(
+            true,
+            "جارٍ إنشاء حساب عميل جديد..."
+        );
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.functions.invoke(
+                "super-service",
+                {
+                    body: {
+
+                        email:
+                            email,
+
+                        password:
+                            temporaryPassword,
+
+                        name:
+                            name,
+
+                        tax_number:
+                            String(
+                                form.get("tax_number") || ""
+                            ).trim() || null,
+
+                        activity:
+                            String(
+                                form.get("activity") || ""
+                            ).trim() || null,
+
+                        contact:
+                            String(
+                                form.get("contact") || ""
+                            ).trim() || null,
+
+                        address:
+                            String(
+                                form.get("address") || ""
+                            ).trim() || null,
+
+                        notes:
+                            String(
+                                form.get("notes") || ""
+                            ).trim() || null
+                    }
+                }
+            );
+
+        if (error) {
+
+            console.error(
+                "CREATE CLIENT FUNCTION ERROR:",
+                error
+            );
+
+            /*
+               Supabase قد يعيد خطأ HTTP مع context غير واضح،
+               لذلك نحاول استخراج نص الاستجابة عند الحاجة.
+            */
+            let detailedMessage =
+                error.message ||
+                "فشل الاتصال بخدمة إنشاء العميل.";
+
+            try {
+
+                const response =
+                    error.context;
+
+                if (
+                    response &&
+                    typeof response.json === "function"
+                ) {
+
+                    const body =
+                        await response.json();
+
+                    if (body?.error) {
+
+                        detailedMessage =
+                            body.error;
+                    }
+                }
+
+            } catch (_) {}
+
+            showToast(
+                "فشل إنشاء العميل",
+                detailedMessage
+            );
+
+            return;
+        }
+
+        if (
+            !data?.success ||
+            !data?.client
+        ) {
+
+            showToast(
+                "فشل إنشاء العميل",
+                data?.error ||
+                "لم تُرجع خدمة إنشاء العميل نتيجة صحيحة."
+            );
+
+            return;
+        }
+
+        dbClients.unshift(
+            data.client
+        );
+
+        updateCounters();
+
+        closeModal();
+
+        /*
+           نعرض كلمة المرور المؤقتة مرة واحدة للمدقق.
+           لا يتم تخزينها في localStorage أو database.
+        */
+        openModal(
+            "تم إنشاء حساب العميل ✅",
+            `
+                <div class="info-box mb-4">
+
+                    تم إنشاء حساب العميل وربطه بملفه بنجاح.
+
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="form-group full">
+
+                        <label>
+                            اسم العميل
+                        </label>
+
+                        <input
+                            value="${escapeAttribute(name)}"
+                            disabled
+                        >
+
+                    </div>
+
+                    <div class="form-group full">
+
+                        <label>
+                            البريد الإلكتروني
+                        </label>
+
+                        <input
+                            value="${escapeAttribute(email)}"
+                            disabled
+                        >
+
+                    </div>
+
+                    <div class="form-group full">
+
+                        <label>
+                            كلمة المرور المؤقتة
+                        </label>
+
+                        <input
+                            id="createdClientPassword"
+                            value="${escapeAttribute(temporaryPassword)}"
+                            readonly
+                            style="letter-spacing:1px;font-weight:700;"
+                        >
+
+                    </div>
+
+                </div>
+
+                <div class="danger-box mt-4">
+
+                    احفظي كلمة المرور وأرسليها للعميل عبر وسيلة آمنة.
+                    لن يتم حفظ كلمة المرور داخل ملف العميل أو عرضها لاحقًا من هذه الصفحة.
+
+                </div>
+
+                <div class="modal-actions">
+
+                    <button
+                        class="btn"
+                        type="button"
+                        onclick="copyCreatedClientPassword()"
+                    >
+                        <i data-lucide="copy"></i>
+                        نسخ كلمة المرور
+                    </button>
+
+                    <button
+                        class="btn secondary"
+                        type="button"
+                        onclick="closeModal(); navigate('clients')"
+                    >
+                        إنهاء
+                    </button>
+
+                </div>
+            `
+        );
+
+        window.createdClientTemporaryPassword =
+            temporaryPassword;
+
+        showToast(
+            "تم إنشاء العميل",
+            "تم إنشاء الحساب وملف العميل وربطهما تلقائيًا."
+        );
+
+        setSystemStatus(
+            true,
+            currentRole === "admin"
+                ? "متصل • مدير"
+                : "متصل • مدقق"
+        );
+
+        lucide.createIcons();
+
+    } catch (error) {
 
         console.error(
-            "CLIENT INSERT ERROR:",
+            "CREATE CLIENT PROCESS ERROR:",
             error
         );
 
         showToast(
-            "فشل الحفظ",
-            error.message
+            "خطأ",
+            error?.message ||
+            "تعذر إنشاء حساب العميل."
+        );
+
+    } finally {
+
+        if (saveButton) {
+
+            saveButton.disabled =
+                false;
+        }
+    }
+}
+
+
+
+function copyCreatedClientPassword() {
+
+    const password =
+        window.createdClientTemporaryPassword || "";
+
+    if (!password) {
+
+        showToast(
+            "تعذر النسخ",
+            "لم تعد كلمة المرور متاحة."
         );
 
         return;
     }
 
-    dbClients.unshift(
-        data
-    );
+    if (
+        navigator.clipboard &&
+        navigator.clipboard.writeText
+    ) {
 
-    updateCounters();
+        navigator.clipboard
+            .writeText(password)
+            .then(
+                function () {
 
-    closeModal();
+                    showToast(
+                        "تم النسخ",
+                        "تم نسخ كلمة المرور المؤقتة."
+                    );
+                }
+            )
+            .catch(
+                function () {
 
-    showToast(
-        "تم الحفظ",
-        "تم إنشاء ملف العميل بنجاح."
-    );
+                    showToast(
+                        "تعذر النسخ",
+                        "انسخي كلمة المرور يدويًا."
+                    );
+                }
+            );
 
-    navigate(
-        "clients"
-    );
+    } else {
+
+        showToast(
+            "تعذر النسخ",
+            "انسخي كلمة المرور يدويًا."
+        );
+    }
 }
 
 
@@ -6936,381 +7112,27 @@ function saveEngagement(
    TRANSACTIONS
 ========================================================= */
 
-function renderTransactions() {
 
-    const content =
-        document.getElementById(
-            "content"
-        );
-
-    content.innerHTML = `
-
-        <div class="page-header">
-
-            <div>
-
-                <h2>
-                    البيانات والعمليات
-                </h2>
-
-                <p>
-                    مساحة محلية لإدخال البيانات المستخدمة في الاختبارات.
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <div class="glass panel">
-
-            ${
-                localState.transactions.length === 0
-
-                    ? emptyState(
-                        "لا توجد عمليات",
-                        "هذه المساحة مخصصة لإدخال بيانات العمل التحليلي."
-                    )
-
-                    : `
-                        <div class="table-wrapper">
-
-                            <table>
-
-                                <thead>
-
-                                    <tr>
-
-                                        <th>المرجع</th>
-
-                                        <th>التاريخ</th>
-
-                                        <th>الحساب</th>
-
-                                        <th>الوصف</th>
-
-                                        <th>المدين</th>
-
-                                        <th>الدائن</th>
-
-                                    </tr>
-
-                                </thead>
-
-
-                                <tbody>
-
-                                    ${localState.transactions
-                                        .map(
-                                            function (
-                                                t
-                                            ) {
-
-                                                return `
-
-                                                    <tr>
-
-                                                        <td>
-                                                            ${escapeHTML(
-                                                                t.reference
-                                                            )}
-                                                        </td>
-
-                                                        <td>
-                                                            ${escapeHTML(
-                                                                t.date ||
-                                                                "—"
-                                                            )}
-                                                        </td>
-
-                                                        <td>
-                                                            ${escapeHTML(
-                                                                t.account ||
-                                                                "—"
-                                                            )}
-                                                        </td>
-
-                                                        <td>
-                                                            ${escapeHTML(
-                                                                t.description ||
-                                                                "—"
-                                                            )}
-                                                        </td>
-
-                                                        <td>
-                                                            ${escapeHTML(
-                                                                t.debit ||
-                                                                "—"
-                                                            )}
-                                                        </td>
-
-                                                        <td>
-                                                            ${escapeHTML(
-                                                                t.credit ||
-                                                                "—"
-                                                            )}
-                                                        </td>
-
-                                                    </tr>
-                                                `;
-                                            }
-                                        )
-                                        .join("")}
-
-                                </tbody>
-
-                            </table>
-
-                        </div>
-                    `
-            }
-
-        </div>
-    `;
-
-    lucide.createIcons();
-}
 
 
 /* =========================================================
    PRE AUDIT
 ========================================================= */
 
-function renderPreAudit() {
-
-    const content =
-        document.getElementById(
-            "content"
-        );
-
-    content.innerHTML = `
-
-        <div class="page-header">
-
-            <div>
-
-                <h2>
-                    الفحص الآلي الأولي
-                </h2>
-
-                <p>
-                    فحص مبدئي لبيانات التدقيق الداخلية.
-                </p>
-
-            </div>
-
-            <button
-                class="btn"
-                type="button"
-                onclick="runPreAudit()"
-            >
-
-                <i data-lucide="play"></i>
-
-                تشغيل الفحص
-
-            </button>
-
-        </div>
 
 
-        <div class="risk-grid">
-
-            <div class="risk-card glass high">
-
-                <span class="stat-label">
-                    عالية الخطورة
-                </span>
-
-                <div
-                    class="number"
-                    id="highRisk"
-                >
-                    0
-                </div>
-
-            </div>
 
 
-            <div class="risk-card glass medium">
-
-                <span class="stat-label">
-                    تحتاج مراجعة
-                </span>
-
-                <div
-                    class="number"
-                    id="mediumRisk"
-                >
-                    0
-                </div>
-
-            </div>
-
-
-            <div class="risk-card glass low">
-
-                <span class="stat-label">
-                    مراجعة تحليلية
-                </span>
-
-                <div
-                    class="number"
-                    id="lowRisk"
-                >
-                    0
-                </div>
-
-            </div>
-
-        </div>
-    `;
-
-    lucide.createIcons();
-}
-
-
-function runPreAudit() {
-
-    showToast(
-        "الفحص",
-        "هذه المساحة جاهزة للفحوصات التحليلية."
-    );
-}
 
 
 /* =========================================================
    WORKSPACE
 ========================================================= */
 
-function renderWorkspace() {
-
-    const content =
-        document.getElementById(
-            "content"
-        );
-
-    content.innerHTML = `
-
-        <div class="workspace-header glass">
-
-            <div class="workspace-info">
-
-                <div>
-
-                    <div class="eyebrow">
-                        AUDIT WORKSPACE
-                    </div>
-
-                    <h2>
-                        مساحة التدقيق
-                    </h2>
-
-                    <p>
-                        مساحة العمل الخاصة بفريق التدقيق.
-                    </p>
-
-                </div>
-
-                <div>
-
-                    <div class="progress">
-
-                        <span
-                            style="width:35%"
-                        ></span>
-
-                    </div>
-
-                    <div class="progress-text">
-                        تقدم العمل: 35%
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
 
 
-        <div class="audit-sections">
-
-            ${workspaceSection(
-                "Cash & Banks",
-                "النقد والبنوك"
-            )}
-
-            ${workspaceSection(
-                "Accounts Receivable",
-                "الذمم المدينة"
-            )}
-
-            ${workspaceSection(
-                "Inventory",
-                "المخزون"
-            )}
-
-            ${workspaceSection(
-                "Fixed Assets",
-                "الأصول الثابتة"
-            )}
-
-            ${workspaceSection(
-                "Accounts Payable",
-                "الذمم الدائنة"
-            )}
-
-            ${workspaceSection(
-                "Revenue",
-                "الإيرادات"
-            )}
-
-            ${workspaceSection(
-                "Expenses",
-                "المصروفات"
-            )}
-
-            ${workspaceSection(
-                "Financial Statements",
-                "القوائم المالية"
-            )}
-
-        </div>
-    `;
-
-    lucide.createIcons();
-}
 
 
-function workspaceSection(
-    title,
-    arabic
-) {
-
-    return `
-
-        <div
-            class="audit-section glass"
-            onclick="showToast('مساحة التدقيق', '${escapeAttribute(arabic)}')"
-        >
-
-            <div class="audit-section-icon">
-
-                <i data-lucide="folder-check"></i>
-
-            </div>
-
-            <strong>
-                ${escapeHTML(title)}
-            </strong>
-
-            <small>
-                ${escapeHTML(arabic)}
-            </small>
-
-        </div>
-    `;
-}
 
 
 /* =========================================================
@@ -7328,15 +7150,7 @@ function renderTests() {
 }
 
 
-function renderSamples() {
 
-    renderSimplePage(
-        "العينات",
-        "إدارة عينات التدقيق.",
-        "grid",
-        "لا توجد عينات حالية."
-    );
-}
 
 
 function renderExceptions() {
@@ -7350,48 +7164,16 @@ function renderExceptions() {
 }
 
 
-function renderInquiries() {
-
-    renderSimplePage(
-        "الاستفسارات",
-        "طلبات التوضيح والتواصل مع العملاء.",
-        "help-circle",
-        "لا توجد استفسارات حاليًا."
-    );
-}
 
 
-function renderWorkingPapers() {
-
-    renderSimplePage(
-        "أوراق العمل",
-        "إدارة أوراق العمل الإلكترونية.",
-        "file-check",
-        "لا توجد أوراق عمل حالية."
-    );
-}
 
 
-function renderAnalytical() {
-
-    renderSimplePage(
-        "المراجعة التحليلية",
-        "تحليل الفروقات والاتجاهات.",
-        "trending-up",
-        "لا توجد مراجعات تحليلية حاليًا."
-    );
-}
 
 
-function renderReview() {
 
-    renderSimplePage(
-        "المراجعة الداخلية",
-        "مراجعة واعتماد أعمال التدقيق.",
-        "shield-alert",
-        "لا توجد ملاحظات مراجعة حاليًا."
-    );
-}
+
+
+
 
 
 function renderReports() {
@@ -7462,13 +7244,784 @@ function renderSimplePage(
 
             ${emptyState(
                 emptyTitle,
-                "يمكننا ربط هذا القسم بقاعدة البيانات لاحقًا."
+                "هذا القسم جاهز للعمل ضمن بوابة التدقيق."
             )}
 
         </div>
     `;
 
     lucide.createIcons();
+}
+
+
+
+/* =========================================================
+   AUTO AUDIT
+========================================================= */
+
+function renderPreAudit() {
+
+    const content =
+        document.getElementById("content");
+
+    if (!content) return;
+
+    const high =
+        localState.auditTrail.filter(
+            item => item.action === "فحص آلي - عالية"
+        ).length;
+
+    const medium =
+        localState.auditTrail.filter(
+            item => item.action === "فحص آلي - متوسطة"
+        ).length;
+
+    const low =
+        localState.auditTrail.filter(
+            item => item.action === "فحص آلي - منخفضة"
+        ).length;
+
+    content.innerHTML = `
+
+        <div class="page-header">
+
+            <div>
+                <h2>الفحص الآلي الأولي</h2>
+                <p>تحليل أولي لبيانات التدقيق واكتشاف المؤشرات التي تحتاج إلى مراجعة.</p>
+            </div>
+
+            <button
+                class="btn"
+                type="button"
+                onclick="runPreAudit()"
+            >
+                <i data-lucide="play"></i>
+                تشغيل الفحص
+            </button>
+
+        </div>
+
+        <div class="risk-grid">
+
+            <div class="risk-card glass high">
+                <span class="stat-label">عالية الخطورة</span>
+                <div class="number">${high}</div>
+            </div>
+
+            <div class="risk-card glass medium">
+                <span class="stat-label">تحتاج مراجعة</span>
+                <div class="number">${medium}</div>
+            </div>
+
+            <div class="risk-card glass low">
+                <span class="stat-label">مؤشرات تحليلية</span>
+                <div class="number">${low}</div>
+            </div>
+
+        </div>
+
+        <div class="glass panel" style="margin-top:18px">
+
+            <div class="panel-header">
+
+                <div>
+                    <div class="panel-title">نتائج الفحص</div>
+                    <div class="panel-sub">
+                        نتائج الفحص الحالية المسجلة في سجل التدقيق.
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="preAuditResults">
+                ${emptyState(
+                    "جاهز للفحص",
+                    "اضغط تشغيل الفحص لبدء التحليل الآلي."
+                )}
+            </div>
+
+        </div>
+    `;
+
+    lucide.createIcons();
+}
+
+
+function runPreAudit() {
+
+    const results = [];
+
+    /*
+      نعتمد على المستندات والطلبات الموجودة فعليًا
+      ونولّد مؤشرات أولية مفيدة للمدقق.
+    */
+
+    dbDocuments.forEach(function(doc) {
+
+        const request =
+            dbRequests.find(
+                item =>
+                    String(item.id) ===
+                    String(doc.request_id)
+            );
+
+        if (!doc.file_path) {
+
+            results.push({
+                level: "High",
+                title: doc.name || "مستند",
+                message: "المستند مسجل في قاعدة البيانات لكن مسار الملف مفقود."
+            });
+
+            return;
+        }
+
+        if (
+            doc.status === "revision"
+        ) {
+
+            results.push({
+                level: "Medium",
+                title: doc.name || "مستند",
+                message: "المستند يحتاج تعديلًا أو إعادة رفع."
+            });
+
+            return;
+        }
+
+        if (
+            request &&
+            request.priority === "high" &&
+            doc.status === "uploaded"
+        ) {
+
+            results.push({
+                level: "Medium",
+                title: doc.name || "مستند",
+                message: "طلب عالي الأولوية ما زال بانتظار المراجعة."
+            });
+
+            return;
+        }
+
+        results.push({
+            level: "Low",
+            title: doc.name || "مستند",
+            message: "المستند صالح مبدئيًا ولا توجد إشارة آلية إضافية."
+        });
+    });
+
+    let high = 0;
+    let medium = 0;
+    let low = 0;
+
+    results.forEach(function(item) {
+
+        if (item.level === "High") high++;
+        else if (item.level === "Medium") medium++;
+        else low++;
+    });
+
+    /*
+      تنظيف نتائج الفحص السابقة من السجل المحلي
+    */
+    localState.auditTrail =
+        localState.auditTrail.filter(
+            item =>
+                !String(item.action || "")
+                    .startsWith("فحص آلي -")
+        );
+
+    results.forEach(function(item) {
+
+        localState.auditTrail.unshift({
+            id:
+                "SCAN-" +
+                Date.now() +
+                "-" +
+                Math.random()
+                    .toString(36)
+                    .slice(2, 7),
+
+            action:
+                `فحص آلي - ${
+                    item.level === "High"
+                        ? "عالية"
+                        : item.level === "Medium"
+                            ? "متوسطة"
+                            : "منخفضة"
+                }`,
+
+            entity:
+                "PreAudit",
+
+            entityId:
+                item.title,
+
+            details:
+                item.message,
+
+            timestamp:
+                new Date().toISOString()
+        });
+    });
+
+    saveLocalState();
+
+    const container =
+        document.getElementById("preAuditResults");
+
+    if (!container) return;
+
+    if (results.length === 0) {
+
+        container.innerHTML =
+            emptyState(
+                "لا توجد بيانات للفحص",
+                "لا توجد مستندات حالية يمكن تحليلها."
+            );
+
+        lucide.createIcons();
+        return;
+    }
+
+    container.innerHTML = `
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>العنصر</th>
+                        <th>مستوى الخطورة</th>
+                        <th>النتيجة</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    ${results.map(function(item) {
+
+                        return `
+
+                            <tr>
+
+                                <td>
+                                    ${escapeHTML(item.title)}
+                                </td>
+
+                                <td>
+                                    ${
+                                        item.level === "High"
+                                            ? '<span class="badge red">عالية</span>'
+                                            : item.level === "Medium"
+                                                ? '<span class="badge orange">متوسطة</span>'
+                                                : '<span class="badge blue">منخفضة</span>'
+                                    }
+                                </td>
+
+                                <td>
+                                    ${escapeHTML(item.message)}
+                                </td>
+
+                            </tr>
+                        `;
+                    }).join("")}
+
+                </tbody>
+
+            </table>
+
+        </div>
+    `;
+
+    toast(
+        "اكتمل الفحص",
+        `تم تحليل ${dbDocuments.length} مستند.`
+    );
+
+    lucide.createIcons();
+}
+
+
+/* =========================================================
+   CLIENT MESSAGES
+========================================================= */
+
+function renderClientMessages() {
+
+    const content =
+        document.getElementById("content");
+
+    if (!content) return;
+
+    const clients =
+        dbClients;
+
+    content.innerHTML = `
+
+        <div class="page-header">
+
+            <div>
+
+                <h2>رسائل العملاء</h2>
+
+                <p>
+                    التواصل المباشر مع العملاء وقراءة استفساراتهم والرد عليها.
+                </p>
+
+            </div>
+
+            <div class="page-actions">
+
+                <button
+                    class="btn secondary"
+                    type="button"
+                    onclick="manualRefreshMessages()"
+                >
+                    <i data-lucide="refresh-cw"></i>
+                    تحديث
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="glass panel">
+
+            ${
+                clients.length === 0
+                    ? emptyState(
+                        "لا يوجد عملاء",
+                        "أنشئي ملف عميل أولًا لبدء المحادثات."
+                    )
+                    : `
+                        <div class="table-wrapper">
+
+                            <table>
+
+                                <thead>
+
+                                    <tr>
+                                        <th>العميل</th>
+                                        <th>البريد</th>
+                                        <th>عدد الرسائل</th>
+                                        <th>آخر رسالة</th>
+                                        <th>الإجراء</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    ${clients.map(function(client) {
+
+                                        const messages =
+                                            getClientMessages(client.id);
+
+                                        const last =
+                                            messages[0];
+
+                                        const unread =
+                                            messages.filter(
+                                                item =>
+                                                    item.sender === "client" &&
+                                                    !item.read
+                                            ).length;
+
+                                        return `
+
+                                            <tr>
+
+                                                <td>
+                                                    <strong>
+                                                        ${escapeHTML(
+                                                            client.name ||
+                                                            client.company_name ||
+                                                            "العميل"
+                                                        )}
+                                                    </strong>
+                                                </td>
+
+                                                <td>
+                                                    ${escapeHTML(
+                                                        client.email ||
+                                                        "—"
+                                                    )}
+                                                </td>
+
+                                                <td>
+                                                    ${
+                                                        unread > 0
+                                                            ? `<span class="badge red">${unread} جديدة</span>`
+                                                            : `<span class="badge blue">${messages.length}</span>`
+                                                    }
+                                                </td>
+
+                                                <td>
+                                                    ${
+                                                        last
+                                                            ? escapeHTML(
+                                                                last.message
+                                                            )
+                                                            : "لا توجد رسائل"
+                                                    }
+                                                </td>
+
+                                                <td>
+
+                                                    <button
+                                                        class="btn secondary"
+                                                        type="button"
+                                                        onclick="openClientChat('${escapeAttribute(client.id)}')"
+                                                    >
+                                                        <i data-lucide="message-circle"></i>
+                                                        فتح المحادثة
+                                                    </button>
+
+                                                </td>
+
+                                            </tr>
+                                        `;
+                                    }).join("")}
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+                    `
+            }
+
+        </div>
+    `;
+
+    updateClientMessagesCount();
+    lucide.createIcons();
+}
+
+
+function getClientMessages(clientId) {
+
+    return (localState.inquiryMessages || [])
+        .filter(
+            item =>
+                String(item.client_id) ===
+                String(clientId)
+        )
+        .sort(
+            function(a, b) {
+                return new Date(b.timestamp) -
+                    new Date(a.timestamp);
+            }
+        );
+}
+
+
+function openClientChat(clientId) {
+
+    const client =
+        getClientById(clientId);
+
+    if (!client) return;
+
+    const messages =
+        getClientMessages(clientId)
+            .sort(
+                function(a, b) {
+                    return new Date(a.timestamp) -
+                        new Date(b.timestamp);
+                }
+            );
+
+    /*
+      تعليم رسائل العميل كمقروءة
+    */
+    (localState.inquiryMessages || [])
+        .forEach(function(item) {
+
+            if (
+                String(item.client_id) ===
+                String(clientId)
+            ) {
+
+                if (item.sender === "client") {
+                    item.read = true;
+                }
+            }
+        });
+
+    saveLocalState();
+    updateClientMessagesCount();
+
+    openModal(
+        `محادثة ${client.name || "العميل"}`,
+        `
+            <div
+                id="chatMessages"
+                style="
+                    max-height:420px;
+                    overflow-y:auto;
+                    display:flex;
+                    flex-direction:column;
+                    gap:10px;
+                    padding:4px;
+                "
+            >
+
+                ${
+                    messages.length === 0
+                        ? emptyState(
+                            "لا توجد رسائل",
+                            "لا توجد استفسارات أو رسائل من هذا العميل حاليًا."
+                        )
+                        : messages.map(function(message) {
+
+                            const isClient =
+                                message.sender === "client";
+
+                            return `
+
+                                <div
+                                    style="
+                                        display:flex;
+                                        justify-content:${isClient ? "flex-start" : "flex-end"};
+                                    "
+                                >
+
+                                    <div
+                                        style="
+                                            max-width:82%;
+                                            padding:11px 13px;
+                                            border-radius:16px;
+                                            background:${isClient ? "rgba(255,255,255,.08)" : "linear-gradient(135deg,rgba(42,153,255,.35),rgba(29,84,190,.25))"};
+                                            border:1px solid rgba(255,255,255,.10);
+                                        "
+                                    >
+
+                                        <div
+                                            style="
+                                                font-size:9px;
+                                                color:#8fa7c0;
+                                                margin-bottom:5px;
+                                            "
+                                        >
+                                            ${isClient ? "العميل" : "المدقق"}
+                                            •
+                                            ${formatSupabaseDate(message.timestamp)}
+                                        </div>
+
+                                        <div
+                                            style="
+                                                font-size:11px;
+                                                line-height:1.8;
+                                                color:#fff;
+                                                white-space:pre-wrap;
+                                            "
+                                        >
+                                            ${escapeHTML(message.message)}
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            `;
+                        }).join("")
+                }
+
+            </div>
+
+            <form
+                id="clientChatReplyForm"
+                style="margin-top:16px;"
+                onsubmit="sendAuditorMessage(event,'${escapeAttribute(clientId)}')"
+            >
+
+                <div class="form-group full">
+
+                    <label>
+                        الرد
+                    </label>
+
+                    <textarea
+                        name="message"
+                        required
+                        placeholder="اكتبي ردك للعميل..."
+                        style="min-height:90px;"
+                    ></textarea>
+
+                </div>
+
+                <div class="modal-actions">
+
+                    <button
+                        class="btn"
+                        type="submit"
+                    >
+                        <i data-lucide="send"></i>
+                        إرسال الرد
+                    </button>
+
+                    <button
+                        class="btn secondary"
+                        type="button"
+                        onclick="closeModal()"
+                    >
+                        إغلاق
+                    </button>
+
+                </div>
+
+            </form>
+        `
+    );
+
+    lucide.createIcons();
+
+    setTimeout(function() {
+
+        const box =
+            document.getElementById("chatMessages");
+
+        if (box) {
+            box.scrollTop = box.scrollHeight;
+        }
+
+    }, 50);
+}
+
+
+function sendAuditorMessage(
+    event,
+    clientId
+) {
+
+    event.preventDefault();
+
+    const form =
+        new FormData(event.target);
+
+    const message =
+        String(
+            form.get("message") || ""
+        ).trim();
+
+    if (!message) return;
+
+    if (!Array.isArray(localState.inquiryMessages)) {
+        localState.inquiryMessages = [];
+    }
+
+    localState.inquiryMessages.push({
+
+        id:
+            "MSG-" +
+            Date.now() +
+            "-" +
+            Math.random()
+                .toString(36)
+                .slice(2, 7),
+
+        client_id:
+            clientId,
+
+        sender:
+            "auditor",
+
+        message:
+            message,
+
+        timestamp:
+            new Date().toISOString(),
+
+        read:
+            false
+    });
+
+    saveLocalState();
+
+    addLocalNotification(
+        "رسالة جديدة",
+        "تم إرسال رد للعميل."
+    );
+
+    closeModal();
+
+    toast(
+        "تم الإرسال",
+        "تم إرسال الرسالة إلى محادثة العميل."
+    );
+
+    renderClientMessages();
+}
+
+
+function manualRefreshMessages() {
+
+    renderClientMessages();
+}
+
+
+function updateClientMessagesCount() {
+
+    const count =
+        (localState.inquiryMessages || [])
+            .filter(
+                item =>
+                    item.sender === "client" &&
+                    !item.read
+            )
+            .length;
+
+    const el =
+        document.getElementById(
+            "clientMessagesCount"
+        );
+
+    if (el) {
+        el.textContent = count;
+    }
+}
+
+
+/* =========================================================
+   STATUS / HELPER
+========================================================= */
+
+function addLocalNotification(
+    title,
+    message
+) {
+
+    if (!Array.isArray(localState.notifications)) {
+        localState.notifications = [];
+    }
+
+    localState.notifications.unshift({
+
+        id:
+            "NOT-" +
+            Date.now(),
+
+        title,
+        message,
+
+        timestamp:
+            new Date().toISOString(),
+
+        read:
+            false
+    });
+
+    localState.notifications =
+        localState.notifications.slice(0, 50);
+
+    saveLocalState();
+
+    renderNotifications();
 }
 
 
@@ -7482,28 +8035,40 @@ const LOCAL_STATE_KEY =
 
 function loadLocalState() {
 
+    const defaults = {
+        engagements: [],
+        tests: [],
+        exceptions: [],
+        reports: [],
+        archive: [],
+        auditTrail: [],
+        notifications: [],
+        inquiryMessages: []
+    };
+
     try {
 
         const saved =
-            localStorage.getItem(
-                LOCAL_STATE_KEY
-            );
+            localStorage.getItem(LOCAL_STATE_KEY);
 
         if (!saved) {
+            localState = defaults;
             return;
         }
 
         const parsed =
-            JSON.parse(
-                saved
-            );
+            JSON.parse(saved);
 
         localState = {
-
-            ...localState,
-
-            ...parsed
+            ...defaults,
+            ...(parsed && typeof parsed === 'object' ? parsed : {})
         };
+
+        Object.keys(defaults).forEach(function(key) {
+            if (!Array.isArray(localState[key])) {
+                localState[key] = [];
+            }
+        });
 
     } catch (error) {
 
@@ -7511,9 +8076,10 @@ function loadLocalState() {
             "LOCAL STATE ERROR:",
             error
         );
+
+        localState = defaults;
     }
 }
-
 
 function saveLocalState() {
 
@@ -7542,42 +8108,7 @@ function saveLocalState() {
    NOTIFICATIONS
 ========================================================= */
 
-function addLocalNotification(
-    title,
-    message
-) {
 
-    localState.notifications.unshift({
-
-        id:
-            "NOT-" +
-            Date.now(),
-
-        title:
-            title,
-
-        message:
-            message,
-
-        timestamp:
-            new Date().toISOString(),
-
-        read:
-            false
-    });
-
-    localState.notifications =
-        localState.notifications.slice(
-            0,
-            50
-        );
-
-    saveLocalState();
-
-    renderNotifications();
-
-    updateCounters();
-}
 
 
 function renderNotifications() {
@@ -7592,8 +8123,8 @@ function renderNotifications() {
     }
 
     if (
-        localState.notifications.length ===
-        0
+        !Array.isArray(localState.notifications) ||
+        localState.notifications.length === 0
     ) {
 
         container.innerHTML =
@@ -8242,6 +8773,682 @@ updateCounters();
 
 renderNotifications();
 </script>
+<script>
+/*
+ * AUDITOR -> SUPABASE PERSISTENCE BRIDGE
+ * Include AFTER the existing auditor portal <script>.
+ * Converts the former local workspace into Supabase-backed persistence.
+ */
+
+(async function installAuditorSupabaseBridge () {
+    if (typeof supabaseClient === "undefined") {
+        console.error("AUDITOR BRIDGE: supabaseClient not found.");
+        return;
+    }
+
+    if (typeof localState === "undefined") {
+        console.error("AUDITOR BRIDGE: localState binding not found.");
+        return;
+    }
+
+    const workspaceKeys = [
+        "engagements",
+        "tests",
+        "exceptions",
+        "reports",
+        "archive",
+        "auditTrail"
+    ];
+
+    const originalLoadLocalState = loadLocalState;
+    const originalSaveLocalState = saveLocalState;
+    const originalRenderNotifications = renderNotifications;
+
+    async function loadWorkspaceFromSupabase () {
+        if (!currentUser?.id) return;
+
+        try {
+            const { data, error } = await supabaseClient
+                .from("audit_workspace_state")
+                .select("*")
+                .eq("owner_id", currentUser.id)
+                .maybeSingle();
+
+            if (error) throw error;
+
+            const defaults = {
+                engagements: [],
+                tests: [],
+                exceptions: [],
+                reports: [],
+                archive: [],
+                auditTrail: [],
+                notifications: [],
+                inquiryMessages: []
+            };
+
+            localState = { ...defaults };
+
+            if (data) {
+                workspaceKeys.forEach(key => {
+                    localState[key] = Array.isArray(data[key]) ? data[key] : [];
+                });
+            }
+        } catch (error) {
+            console.error("AUDITOR WORKSPACE LOAD ERROR:", error);
+            originalLoadLocalState();
+        }
+    }
+
+    async function saveWorkspaceToSupabase () {
+        if (!currentUser?.id) return;
+
+        try {
+            const payload = {
+                owner_id: currentUser.id,
+                updated_at: new Date().toISOString()
+            };
+
+            workspaceKeys.forEach(key => {
+                payload[key] = Array.isArray(localState[key]) ? localState[key] : [];
+            });
+
+            const { error } = await supabaseClient
+                .from("audit_workspace_state")
+                .upsert(payload, { onConflict: "owner_id" });
+
+            if (error) throw error;
+        } catch (error) {
+            console.error("AUDITOR WORKSPACE SAVE ERROR:", error);
+            try { originalSaveLocalState(); } catch (_) {}
+        }
+    }
+
+    loadLocalState = function () {
+        // Prevent stale local copies from becoming the source of truth.
+        localState = {
+            engagements: [],
+            tests: [],
+            exceptions: [],
+            reports: [],
+            archive: [],
+            auditTrail: [],
+            notifications: [],
+            inquiryMessages: []
+        };
+    };
+
+    saveLocalState = function () {
+        // Fire-and-forget is intentional because many existing UI actions are synchronous.
+        void saveWorkspaceToSupabase();
+    };
+
+    const originalRestoreSession = restoreSession;
+    restoreSession = async function () {
+        await originalRestoreSession();
+        await loadWorkspaceFromSupabase();
+        await loadAuditorNotificationsFromSupabase();
+        updateCounters();
+        renderNotifications();
+    };
+
+    async function loadAuditorNotificationsFromSupabase () {
+        if (!currentUser?.id) return;
+
+        try {
+            const { data, error } = await supabaseClient
+                .from("notifications")
+                .select("id, title, message, created_at, read")
+                .eq("user_id", currentUser.id)
+                .eq("audience", "auditor")
+                .order("created_at", { ascending: false })
+                .limit(50);
+
+            if (error) throw error;
+
+            localState.notifications = (data || []).map(row => ({
+                id: row.id,
+                title: row.title || "إشعار",
+                message: row.message || "",
+                timestamp: row.created_at,
+                read: Boolean(row.read)
+            }));
+        } catch (error) {
+            console.error("AUDITOR NOTIFICATIONS LOAD ERROR:", error);
+        }
+    }
+
+    async function syncAuditorNotifications () {
+        if (!currentUser?.id) return;
+
+        try {
+            await supabaseClient
+                .from("notifications")
+                .delete()
+                .eq("user_id", currentUser.id)
+                .eq("audience", "auditor");
+
+            const rows = (localState.notifications || []).slice(0, 50).map(item => ({
+                id: item.id,
+                user_id: currentUser.id,
+                audience: "auditor",
+                title: item.title || "إشعار",
+                message: item.message || "",
+                read: Boolean(item.read),
+                created_at: item.timestamp || new Date().toISOString()
+            }));
+
+            if (rows.length) {
+                const { error } = await supabaseClient
+                    .from("notifications")
+                    .insert(rows);
+                if (error) throw error;
+            }
+        } catch (error) {
+            console.error("AUDITOR NOTIFICATIONS SAVE ERROR:", error);
+        }
+    }
+
+    addLocalNotification = function (title, message) {
+        if (!Array.isArray(localState.notifications)) localState.notifications = [];
+
+        const row = {
+            id: `NOT-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            title,
+            message,
+            timestamp: new Date().toISOString(),
+            read: false
+        };
+
+        localState.notifications.unshift(row);
+        localState.notifications = localState.notifications.slice(0, 50);
+        renderNotifications();
+        updateCounters();
+        void syncAuditorNotifications();
+    };
+
+    // Synchronize read/clear actions too.
+    setupNotificationEvents = function () {
+        const button = document.getElementById("notificationButton");
+        if (button && !button.dataset.supabaseBound) {
+            button.dataset.supabaseBound = "1";
+            button.addEventListener("click", async function () {
+                const panel = document.getElementById("notificationPanel");
+                if (panel) panel.classList.toggle("show");
+                (localState.notifications || []).forEach(x => x.read = true);
+                await syncAuditorNotifications();
+                renderNotifications();
+                updateCounters();
+            });
+        }
+
+        const clear = document.getElementById("clearNotifications");
+        if (clear && !clear.dataset.supabaseBound) {
+            clear.dataset.supabaseBound = "1";
+            clear.addEventListener("click", async function () {
+                localState.notifications = [];
+                await syncAuditorNotifications();
+                renderNotifications();
+                updateCounters();
+                toast("تم المسح", "تم مسح إشعارات المدقق.");
+            });
+        }
+    };
+
+    // Client messages are real database rows, not browser-local state.
+    sendAuditorMessage = async function (clientId, message) {
+        const text = String(message || "").trim();
+        if (!clientId || !text || !currentUser?.id) return;
+
+        try {
+            const { error } = await supabaseClient
+                .from("client_messages")
+                .insert({
+                    client_id: clientId,
+                    sender: "auditor",
+                    sender_user_id: currentUser.id,
+                    message: text
+                });
+
+            if (error) throw error;
+
+            toast("تم الإرسال", "تم إرسال الرسالة إلى العميل.");
+        } catch (error) {
+            console.error("AUDITOR SEND MESSAGE ERROR:", error);
+            showToast("فشل إرسال الرسالة", error.message || "تعذر إرسال الرسالة.");
+        }
+    };
+
+    openClientChat = async function (clientId) {
+        try {
+            const { data, error } = await supabaseClient
+                .from("client_messages")
+                .select("*")
+                .eq("client_id", clientId)
+                .order("created_at", { ascending: true });
+
+            if (error) throw error;
+
+            localState.inquiryMessages = (data || []).map(row => ({
+                id: row.id,
+                client_id: row.client_id,
+                sender: row.sender,
+                message: row.message,
+                timestamp: row.created_at,
+                read: row.read
+            }));
+
+            renderClientMessages();
+        } catch (error) {
+            console.error("AUDITOR CHAT LOAD ERROR:", error);
+            showToast("فشل تحميل الرسائل", error.message || "تعذر تحميل رسائل العميل.");
+        }
+    };
+
+    let messageChannel = null;
+    let notificationChannel = null;
+
+    const startSupabaseBridgeRealtime = async function () {
+        if (!currentUser?.id) return;
+
+        if (messageChannel) {
+            try { await supabaseClient.removeChannel(messageChannel); } catch (_) {}
+        }
+        if (notificationChannel) {
+            try { await supabaseClient.removeChannel(notificationChannel); } catch (_) {}
+        }
+
+        messageChannel = supabaseClient
+            .channel(`auditor_messages_${currentUser.id}`)
+            .on("postgres_changes", {
+                event: "*",
+                schema: "public",
+                table: "client_messages"
+            }, async function () {
+                if (currentPage === "clientmessages") {
+                    const activeClient = document.querySelector("[data-active-client-id]")?.dataset?.activeClientId;
+                    if (activeClient) await openClientChat(activeClient);
+                }
+                await updateClientMessagesCount();
+            })
+            .subscribe();
+
+        notificationChannel = supabaseClient
+            .channel(`auditor_notifications_${currentUser.id}`)
+            .on("postgres_changes", {
+                event: "*",
+                schema: "public",
+                table: "notifications",
+                filter: `user_id=eq.${currentUser.id}`
+            }, async function () {
+                await loadAuditorNotificationsFromSupabase();
+                renderNotifications();
+                updateCounters();
+            })
+            .subscribe();
+    };
+
+    const originalSetupRealtimeUpdates = setupRealtimeUpdates;
+    setupRealtimeUpdates = async function () {
+        await originalSetupRealtimeUpdates();
+        await startSupabaseBridgeRealtime();
+    };
+
+    const originalStopRealtime = stopRealtime;
+    stopRealtime = async function () {
+        try { await originalStopRealtime(); } catch (_) {}
+        if (messageChannel) {
+            try { await supabaseClient.removeChannel(messageChannel); } catch (_) {}
+            messageChannel = null;
+        }
+        if (notificationChannel) {
+            try { await supabaseClient.removeChannel(notificationChannel); } catch (_) {}
+            notificationChannel = null;
+        }
+    };
+
+    console.log("AUDITOR SUPABASE BRIDGE: installed");
+})();
+
+</script>
+
+<script>
+/*
+ * AUDITOR -> SUPABASE PERSISTENCE BRIDGE
+ * Include AFTER the existing auditor portal <script>.
+ * Converts the former local workspace into Supabase-backed persistence.
+ */
+
+(async function installAuditorSupabaseBridge () {
+    if (typeof supabaseClient === "undefined") {
+        console.error("AUDITOR BRIDGE: supabaseClient not found.");
+        return;
+    }
+
+    if (typeof localState === "undefined") {
+        console.error("AUDITOR BRIDGE: localState binding not found.");
+        return;
+    }
+
+    const workspaceKeys = [
+        "engagements",
+        "tests",
+        "exceptions",
+        "reports",
+        "archive",
+        "auditTrail"
+    ];
+
+    const originalLoadLocalState = loadLocalState;
+    const originalSaveLocalState = saveLocalState;
+    const originalRenderNotifications = renderNotifications;
+
+    async function loadWorkspaceFromSupabase () {
+        if (!currentUser?.id) return;
+
+        try {
+            const { data, error } = await supabaseClient
+                .from("audit_workspace_state")
+                .select("*")
+                .eq("owner_id", currentUser.id)
+                .maybeSingle();
+
+            if (error) throw error;
+
+            const defaults = {
+                engagements: [],
+                tests: [],
+                exceptions: [],
+                reports: [],
+                archive: [],
+                auditTrail: [],
+                notifications: [],
+                inquiryMessages: []
+            };
+
+            localState = { ...defaults };
+
+            if (data) {
+                workspaceKeys.forEach(key => {
+                    localState[key] = Array.isArray(data[key]) ? data[key] : [];
+                });
+            }
+        } catch (error) {
+            console.error("AUDITOR WORKSPACE LOAD ERROR:", error);
+            originalLoadLocalState();
+        }
+    }
+
+    async function saveWorkspaceToSupabase () {
+        if (!currentUser?.id) return;
+
+        try {
+            const payload = {
+                owner_id: currentUser.id,
+                updated_at: new Date().toISOString()
+            };
+
+            workspaceKeys.forEach(key => {
+                payload[key] = Array.isArray(localState[key]) ? localState[key] : [];
+            });
+
+            const { error } = await supabaseClient
+                .from("audit_workspace_state")
+                .upsert(payload, { onConflict: "owner_id" });
+
+            if (error) throw error;
+        } catch (error) {
+            console.error("AUDITOR WORKSPACE SAVE ERROR:", error);
+            try { originalSaveLocalState(); } catch (_) {}
+        }
+    }
+
+    loadLocalState = function () {
+        // Prevent stale local copies from becoming the source of truth.
+        localState = {
+            engagements: [],
+            tests: [],
+            exceptions: [],
+            reports: [],
+            archive: [],
+            auditTrail: [],
+            notifications: [],
+            inquiryMessages: []
+        };
+    };
+
+    saveLocalState = function () {
+        // Fire-and-forget is intentional because many existing UI actions are synchronous.
+        void saveWorkspaceToSupabase();
+    };
+
+    const originalRestoreSession = restoreSession;
+    restoreSession = async function () {
+        await originalRestoreSession();
+        await loadWorkspaceFromSupabase();
+        await loadAuditorNotificationsFromSupabase();
+        updateCounters();
+        renderNotifications();
+    };
+
+    async function loadAuditorNotificationsFromSupabase () {
+        if (!currentUser?.id) return;
+
+        try {
+            const { data, error } = await supabaseClient
+                .from("notifications")
+                .select("id, title, message, created_at, read")
+                .eq("user_id", currentUser.id)
+                .eq("audience", "auditor")
+                .order("created_at", { ascending: false })
+                .limit(50);
+
+            if (error) throw error;
+
+            localState.notifications = (data || []).map(row => ({
+                id: row.id,
+                title: row.title || "إشعار",
+                message: row.message || "",
+                timestamp: row.created_at,
+                read: Boolean(row.read)
+            }));
+        } catch (error) {
+            console.error("AUDITOR NOTIFICATIONS LOAD ERROR:", error);
+        }
+    }
+
+    async function syncAuditorNotifications () {
+        if (!currentUser?.id) return;
+
+        try {
+            await supabaseClient
+                .from("notifications")
+                .delete()
+                .eq("user_id", currentUser.id)
+                .eq("audience", "auditor");
+
+            const rows = (localState.notifications || []).slice(0, 50).map(item => ({
+                id: item.id,
+                user_id: currentUser.id,
+                audience: "auditor",
+                title: item.title || "إشعار",
+                message: item.message || "",
+                read: Boolean(item.read),
+                created_at: item.timestamp || new Date().toISOString()
+            }));
+
+            if (rows.length) {
+                const { error } = await supabaseClient
+                    .from("notifications")
+                    .insert(rows);
+                if (error) throw error;
+            }
+        } catch (error) {
+            console.error("AUDITOR NOTIFICATIONS SAVE ERROR:", error);
+        }
+    }
+
+    addLocalNotification = function (title, message) {
+        if (!Array.isArray(localState.notifications)) localState.notifications = [];
+
+        const row = {
+            id: `NOT-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            title,
+            message,
+            timestamp: new Date().toISOString(),
+            read: false
+        };
+
+        localState.notifications.unshift(row);
+        localState.notifications = localState.notifications.slice(0, 50);
+        renderNotifications();
+        updateCounters();
+        void syncAuditorNotifications();
+    };
+
+    // Synchronize read/clear actions too.
+    setupNotificationEvents = function () {
+        const button = document.getElementById("notificationButton");
+        if (button && !button.dataset.supabaseBound) {
+            button.dataset.supabaseBound = "1";
+            button.addEventListener("click", async function () {
+                const panel = document.getElementById("notificationPanel");
+                if (panel) panel.classList.toggle("show");
+                (localState.notifications || []).forEach(x => x.read = true);
+                await syncAuditorNotifications();
+                renderNotifications();
+                updateCounters();
+            });
+        }
+
+        const clear = document.getElementById("clearNotifications");
+        if (clear && !clear.dataset.supabaseBound) {
+            clear.dataset.supabaseBound = "1";
+            clear.addEventListener("click", async function () {
+                localState.notifications = [];
+                await syncAuditorNotifications();
+                renderNotifications();
+                updateCounters();
+                toast("تم المسح", "تم مسح إشعارات المدقق.");
+            });
+        }
+    };
+
+    // Client messages are real database rows, not browser-local state.
+    sendAuditorMessage = async function (clientId, message) {
+        const text = String(message || "").trim();
+        if (!clientId || !text || !currentUser?.id) return;
+
+        try {
+            const { error } = await supabaseClient
+                .from("client_messages")
+                .insert({
+                    client_id: clientId,
+                    sender: "auditor",
+                    sender_user_id: currentUser.id,
+                    message: text
+                });
+
+            if (error) throw error;
+
+            toast("تم الإرسال", "تم إرسال الرسالة إلى العميل.");
+        } catch (error) {
+            console.error("AUDITOR SEND MESSAGE ERROR:", error);
+            showToast("فشل إرسال الرسالة", error.message || "تعذر إرسال الرسالة.");
+        }
+    };
+
+    openClientChat = async function (clientId) {
+        try {
+            const { data, error } = await supabaseClient
+                .from("client_messages")
+                .select("*")
+                .eq("client_id", clientId)
+                .order("created_at", { ascending: true });
+
+            if (error) throw error;
+
+            localState.inquiryMessages = (data || []).map(row => ({
+                id: row.id,
+                client_id: row.client_id,
+                sender: row.sender,
+                message: row.message,
+                timestamp: row.created_at,
+                read: row.read
+            }));
+
+            renderClientMessages();
+        } catch (error) {
+            console.error("AUDITOR CHAT LOAD ERROR:", error);
+            showToast("فشل تحميل الرسائل", error.message || "تعذر تحميل رسائل العميل.");
+        }
+    };
+
+    let messageChannel = null;
+    let notificationChannel = null;
+
+    const startSupabaseBridgeRealtime = async function () {
+        if (!currentUser?.id) return;
+
+        if (messageChannel) {
+            try { await supabaseClient.removeChannel(messageChannel); } catch (_) {}
+        }
+        if (notificationChannel) {
+            try { await supabaseClient.removeChannel(notificationChannel); } catch (_) {}
+        }
+
+        messageChannel = supabaseClient
+            .channel(`auditor_messages_${currentUser.id}`)
+            .on("postgres_changes", {
+                event: "*",
+                schema: "public",
+                table: "client_messages"
+            }, async function () {
+                if (currentPage === "clientmessages") {
+                    const activeClient = document.querySelector("[data-active-client-id]")?.dataset?.activeClientId;
+                    if (activeClient) await openClientChat(activeClient);
+                }
+                await updateClientMessagesCount();
+            })
+            .subscribe();
+
+        notificationChannel = supabaseClient
+            .channel(`auditor_notifications_${currentUser.id}`)
+            .on("postgres_changes", {
+                event: "*",
+                schema: "public",
+                table: "notifications",
+                filter: `user_id=eq.${currentUser.id}`
+            }, async function () {
+                await loadAuditorNotificationsFromSupabase();
+                renderNotifications();
+                updateCounters();
+            })
+            .subscribe();
+    };
+
+    const originalSetupRealtimeUpdates = setupRealtimeUpdates;
+    setupRealtimeUpdates = async function () {
+        await originalSetupRealtimeUpdates();
+        await startSupabaseBridgeRealtime();
+    };
+
+    const originalStopRealtime = stopRealtime;
+    stopRealtime = async function () {
+        try { await originalStopRealtime(); } catch (_) {}
+        if (messageChannel) {
+            try { await supabaseClient.removeChannel(messageChannel); } catch (_) {}
+            messageChannel = null;
+        }
+        if (notificationChannel) {
+            try { await supabaseClient.removeChannel(notificationChannel); } catch (_) {}
+            notificationChannel = null;
+        }
+    };
+
+    console.log("AUDITOR SUPABASE BRIDGE: installed");
+})();
+
+</script>
 </body>
 </html>
-
