@@ -8907,8 +8907,7 @@ openModal(
 "إضافة ملف عميل",
 `
 <div class="info-box mb-4">
-أدخلي بيانات العميل فقط. سيتم إرسال دعوة آمنة إلى بريده الإلكتروني،
-ثم إنشاء ملف العميل وربطه بحساب الدخول تلقائيًا.
+أدخلي بيانات العميل فقط. سيتم إنشاء حساب الدخول وربطه بملف العميل تلقائيًا.
 </div>
 <form id="clientForm" onsubmit="saveSupabaseClient(event)">
 <div class="form-grid">
@@ -8942,12 +8941,12 @@ openModal(
 </div>
 </div>
 <div class="info-box mt-4">
-كلمة المرور لا تُنشأ داخل المتصفح. سيختار العميل كلمة المرور من خلال دعوة البريد الإلكتروني.
+سيتم إنشاء كلمة مرور مؤقتة تلقائيًا، وستظهر لك مرة واحدة بعد إنشاء الحساب.
 </div>
 <div class="modal-actions">
 <button class="btn" type="submit" id="saveClientButton">
 <i data-lucide="user-plus"></i>
-إرسال دعوة وإنشاء العميل
+إنشاء حساب العميل
 </button>
 <button class="btn secondary" type="button" onclick="closeModal()">إلغاء</button>
 </div>
@@ -8973,12 +8972,16 @@ button.disabled = true;
 button.innerHTML = '<i data-lucide="loader-circle" class="animate-spin"></i> جارٍ إنشاء العميل...';
 lucide.createIcons();
 }
-setSystemStatus(true, "جارٍ إرسال دعوة العميل...");
+setSystemStatus(true, "جارٍ إنشاء حساب العميل...");
+const temporaryPassword = typeof generateSecurePassword === "function"
+? generateSecurePassword()
+: Math.random().toString(36).slice(-10) + "A1!";
 const result = await invokeService({
 action: "create",
 clientData: {
 name,
 email,
+password: temporaryPassword,
 tax_number: String(form.get("tax_number") || "").trim() || null,
 activity: String(form.get("activity") || "").trim() || null,
 contact: String(form.get("contact") || "").trim() || null,
@@ -8987,18 +8990,35 @@ notes: String(form.get("notes") || "").trim() || null
 }
 });
 dbClients = [result.client, ...dbClients.filter(c => String(c.id) !== String(result.client.id))];
-closeModal();
 await loadClientsFromSupabase();
 updateCounters();
 renderClients();
-toast("تم إنشاء العميل", "تم إنشاء ملف العميل وإرسال دعوة إلى بريده الإلكتروني.");
+closeModal();
+openModal(
+"تم إنشاء حساب العميل ✅",
+`
+<div class="info-box mb-4">تم إنشاء حساب العميل وربطه بملفه بنجاح.</div>
+<div class="form-grid">
+<div class="form-group full"><label>اسم العميل</label><input value="${escapeAttribute(name)}" disabled></div>
+<div class="form-group full"><label>البريد الإلكتروني</label><input value="${escapeAttribute(email)}" disabled></div>
+<div class="form-group full"><label>كلمة المرور المؤقتة</label><input id="createdClientPassword" value="${escapeAttribute(result.temporaryPassword || temporaryPassword)}" readonly style="letter-spacing:1px;font-weight:700;"></div>
+</div>
+<div class="danger-box mt-4">احفظي كلمة المرور وأرسليها للعميل عبر وسيلة آمنة. لن يتم تخزينها داخل ملف العميل.</div>
+<div class="modal-actions">
+<button class="btn" type="button" onclick="copyCreatedClientPassword()"><i data-lucide="copy"></i>نسخ كلمة المرور</button>
+<button class="btn secondary" type="button" onclick="closeModal(); navigate('clients')">إنهاء</button>
+</div>
+`
+);
+lucide.createIcons();
+toast("تم إنشاء العميل", "تم إنشاء الحساب وربطه بملف العميل.");
 } catch(error){
 console.error("FINAL CREATE CLIENT ERROR", error);
 showToast("فشل إنشاء العميل", humanError(error));
 } finally {
 if (button){
 button.disabled = false;
-button.innerHTML = '<i data-lucide="user-plus"></i> إرسال دعوة وإنشاء العميل';
+button.innerHTML = '<i data-lucide="user-plus"></i> إنشاء حساب العميل';
 lucide.createIcons();
 }
 setSystemStatus(true, currentRole === "admin" ? "متصل • مدير • تحديث مباشر" : "متصل • مدقق • تحديث مباشر");
@@ -9013,9 +9033,14 @@ const client = getClientById(clientId);
 if (!client) return showToast("العميل غير موجود", "تعذر العثور على ملف العميل.");
 const name = client.name || client.company_name || "هذا العميل";
 const confirmed = window.confirm(
-`سيتم حذف ${name} نهائيًا مع ملفاته وطلباته ورسائله وإشعاراته.\n\nهل تريدين المتابعة؟`
+`⚠️ حذف نهائي\n\nسيتم حذف ${name} نهائيًا مع ملفاته وطلباته ورسائله وإشعاراته.\n\nهذه العملية لا يمكن التراجع عنها. هل تريدين المتابعة؟`
 );
 if (!confirmed) return;
+const typedName = window.prompt(`للتأكيد، اكتبي اسم الشركة/العميل حرفيًا:\n\n${name}`);
+if (String(typedName || '').trim() !== String(name).trim()) {
+showToast('تم إلغاء الحذف', 'اسم التأكيد غير مطابق، ولم يتم حذف العميل.');
+return;
+}
 try{
 setSystemStatus(true, "جارٍ حذف العميل...");
 await invokeService({ action: "delete", clientId: String(clientId) });
@@ -9564,13 +9589,8 @@ console.log("FINAL AUDITOR SUPABASE ENHANCEMENTS: installed");
     ensureStateNoSave();
     localState.auditTrail.unshift({
       id: `AT-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,
-      action,
-      entity,
-      entityId: String(entityId || ''),
-      clientId: clientId ? String(clientId) : null,
-      details: String(details || ''),
-      timestamp: new Date().toISOString(),
-      userId: currentUser?.id || null
+      action, entity, entityId: String(entityId || ''), clientId: clientId ? String(clientId) : null,
+      details: String(details || ''), timestamp: new Date().toISOString(), userId: currentUser?.id || null
     });
     localState.auditTrail = localState.auditTrail.slice(0, 500);
     saveLocalState();
@@ -9580,6 +9600,38 @@ console.log("FINAL AUDITOR SUPABASE ENHANCEMENTS: installed");
     for (const k of ['tests','exceptions','reports','archive','auditTrail']) {
       if (!Array.isArray(localState[k])) localState[k] = [];
     }
+  }
+
+  async function loadWorkflowDataFromSupabase(){
+    if (!currentUser?.id) return;
+    const [testsRes, exceptionsRes, archiveRes, trailRes] = await Promise.all([
+      supabaseClient.from('audit_tests').select('id,client_id,engagement_id,title,area,procedure,result,notes,created_by,created_at,updated_at').order('created_at',{ascending:false}),
+      supabaseClient.from('audit_exceptions').select('id,client_id,title,category,severity,status,description,impact,recommendation,created_by,created_at,updated_at').order('created_at',{ascending:false}),
+      supabaseClient.from('audit_archive').select('id,entity_type,entity_id,client_id,snapshot,archived_by,archived_at').order('archived_at',{ascending:false}),
+      supabaseClient.from('audit_trail').select('id,actor_user_id,actor_role,action,entity,entity_id,client_id,details,metadata,created_at,timestamp,user_id').order('created_at',{ascending:false}).limit(500)
+    ]);
+    for (const r of [testsRes, exceptionsRes, archiveRes, trailRes]) { if (r.error) throw r.error; }
+    localState.tests = (testsRes.data||[]).map(t=>({
+      id:t.id, clientId:t.client_id, engagementId:t.engagement_id, title:t.title, area:t.area||'', procedure:t.procedure||'', result:t.result||'review', notes:t.notes||'', createdBy:t.created_by||null, createdAt:t.created_at, updatedAt:t.updated_at
+    }));
+    localState.exceptions = (exceptionsRes.data||[]).map(e=>({
+      id:e.id, clientId:e.client_id, title:e.title, category:e.category||'', severity:e.severity||'medium', status:e.status||'open', description:e.description||'', impact:e.impact||'', recommendation:e.recommendation||'', createdBy:e.created_by||null, createdAt:e.created_at, updatedAt:e.updated_at
+    }));
+    localState.archive = (archiveRes.data||[]).map(a=>({
+      id:a.id, sourceId:a.entity_id, type:a.entity_type, title:a.snapshot?.title||a.entity_type, clientId:a.client_id, reason:a.snapshot?.reason||'', archivedAt:a.archived_at, snapshot:a.snapshot
+    }));
+    localState.auditTrail = (trailRes.data||[]).map(a=>({
+      id:a.id, action:a.action, entity:a.entity, entityId:a.entity_id, clientId:a.client_id, details:a.details||'', timestamp:a.created_at||a.timestamp, userId:a.actor_user_id||a.user_id||null
+    }));
+    saveLocalState();
+  }
+
+  async function upsertAuditTrailRow(action, entity, entityId, details, clientId=null, metadata=null){
+    if (!currentUser?.id) return;
+    const { error } = await supabaseClient.from('audit_trail').insert({
+      actor_user_id: currentUser.id, actor_role: currentRole || 'auditor', action, entity, entity_id:String(entityId||''), client_id:clientId || null, details:String(details||''), metadata:metadata || null, created_at:new Date().toISOString()
+    });
+    if (error) console.warn('AUDIT TRAIL DB ERROR:', error.message);
   }
 
   function clientName(id){
@@ -9675,31 +9727,39 @@ console.log("FINAL AUDITOR SUPABASE ENHANCEMENTS: installed");
     lucide.createIcons();
   };
 
-  window.saveTest = function(event, existingId){
+  window.saveTest = async function(event, existingId){
     event.preventDefault();
     ensureStateNoSave();
     const f = new FormData(event.target);
     const clientId = String(f.get('clientId')||'').trim();
     const title = String(f.get('title')||'').trim();
     if (!clientId || !title) return showToast('بيانات ناقصة','اختاري العميل واكتبي عنوان الاختبار.');
-    const item = {
-      id: existingId || `TST-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,
-      clientId,
+    const old = localState.tests.find(x=>String(x.id)===String(existingId));
+    const id = existingId || crypto.randomUUID();
+    const payload = {
+      client_id: clientId,
       title,
-      area: String(f.get('area')||'').trim(),
-      procedure: String(f.get('procedure')||'').trim(),
+      area: String(f.get('area')||'').trim() || null,
+      procedure: String(f.get('procedure')||'').trim() || null,
       result: String(f.get('result')||'review'),
-      reference: String(f.get('reference')||'').trim(),
-      notes: String(f.get('notes')||'').trim(),
-      createdAt: existingId ? (localState.tests.find(x=>String(x.id)===String(existingId))?.createdAt || new Date().toISOString()) : new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      notes: String(f.get('notes')||'').trim() || null,
+      created_by: currentUser?.id || null,
+      updated_at: new Date().toISOString()
     };
-    const idx = localState.tests.findIndex(x=>String(x.id)===String(item.id));
-    if (idx >= 0) localState.tests[idx]=item; else localState.tests.unshift(item);
-    saveLocalState();
-    audit(idx>=0?'تعديل اختبار':'إنشاء اختبار','test',item.id,`${item.title} • ${item.result}`,clientId);
-    closeModal(); renderTests();
-    toast('تم حفظ الاختبار', idx>=0?'تم تحديث الاختبار.':'تمت إضافة اختبار التدقيق.');
+    try {
+      setSystemStatus(true,'جارٍ حفظ اختبار التدقيق...');
+      let data,error;
+      if(existingId){ ({data,error}=await supabaseClient.from('audit_tests').update(payload).eq('id',existingId).select().single()); }
+      else { ({data,error}=await supabaseClient.from('audit_tests').insert({...payload,id}).select().single()); }
+      if(error) throw error;
+      const item={id:data.id,clientId:data.client_id,engagementId:data.engagement_id,title:data.title,area:data.area||'',procedure:data.procedure||'',result:data.result,notes:data.notes||'',reference:'',createdAt:data.created_at,updatedAt:data.updated_at};
+      const idx=localState.tests.findIndex(x=>String(x.id)===String(item.id));
+      if(idx>=0)localState.tests[idx]=item;else localState.tests.unshift(item);
+      saveLocalState();
+      await upsertAuditTrailRow(idx>=0?'تعديل اختبار':'إنشاء اختبار','test',item.id,`${item.title} • ${item.result}`,clientId);
+      audit(idx>=0?'تعديل اختبار':'إنشاء اختبار','test',item.id,`${item.title} • ${item.result}`,clientId);
+      closeModal(); renderTests(); toast('تم حفظ الاختبار',idx>=0?'تم تحديث الاختبار.':'تمت إضافة اختبار التدقيق.');
+    } catch(error){ console.error('SAVE TEST ERROR',error); showToast('فشل حفظ الاختبار',error?.message||'تعذر حفظ اختبار التدقيق.'); }
   };
 
   window.viewTest = function(id){
@@ -9714,11 +9774,15 @@ console.log("FINAL AUDITOR SUPABASE ENHANCEMENTS: installed");
     lucide.createIcons();
   };
 
-  window.deleteTest = function(id){
+  window.deleteTest = async function(id){
     const t = localState.tests.find(x=>String(x.id)===String(id)); if(!t) return;
     if(!confirm(`حذف الاختبار "${t.title}"؟`)) return;
-    localState.tests = localState.tests.filter(x=>String(x.id)!==String(id));
-    saveLocalState(); audit('حذف اختبار','test',id,t.title,t.clientId); renderTests(); toast('تم الحذف','تم حذف اختبار التدقيق.');
+    try {
+      const {error}=await supabaseClient.from('audit_tests').delete().eq('id',id); if(error) throw error;
+      localState.tests = localState.tests.filter(x=>String(x.id)!==String(id)); saveLocalState();
+      await upsertAuditTrailRow('حذف اختبار','test',id,t.title,t.clientId);
+      audit('حذف اختبار','test',id,t.title,t.clientId); renderTests(); toast('تم الحذف','تم حذف اختبار التدقيق.');
+    } catch(error){ console.error('DELETE TEST ERROR',error); showToast('فشل الحذف',error?.message||'تعذر حذف الاختبار.'); }
   };
 
   /* =========================
@@ -9757,17 +9821,24 @@ console.log("FINAL AUDITOR SUPABASE ENHANCEMENTS: installed");
     lucide.createIcons();
   };
 
-  window.saveException = function(event, existingId){
+  window.saveException = async function(event, existingId){
     event.preventDefault(); ensureStateNoSave(); const f=new FormData(event.target); const clientId=String(f.get('clientId')||'').trim(); const title=String(f.get('title')||'').trim();
     if(!clientId||!title) return showToast('بيانات ناقصة','اختاري العميل واكتبي عنوان الاستثناء.');
-    const old=localState.exceptions.find(x=>String(x.id)===String(existingId));
-    const item={id:existingId||`EXC-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,clientId,title,category:String(f.get('category')||'أخرى'),severity:String(f.get('severity')||'medium'),status:String(f.get('status')||'open'),impact:String(f.get('impact')||'').trim(),description:String(f.get('description')||'').trim(),recommendation:String(f.get('recommendation')||'').trim(),createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
-    const idx=localState.exceptions.findIndex(x=>String(x.id)===String(item.id)); if(idx>=0)localState.exceptions[idx]=item;else localState.exceptions.unshift(item); saveLocalState(); audit(idx>=0?'تعديل استثناء':'إنشاء استثناء','exception',item.id,`${item.title} • ${item.severity} • ${item.status}`,clientId); closeModal(); renderExceptions(); toast('تم الحفظ','تم حفظ الاستثناء ومتابعة حالته.');
+    const id=existingId||crypto.randomUUID();
+    const payload={client_id:clientId,title,category:String(f.get('category')||'أخرى'),severity:String(f.get('severity')||'medium'),status:String(f.get('status')||'open'),impact:String(f.get('impact')||'').trim()||null,description:String(f.get('description')||'').trim()||null,recommendation:String(f.get('recommendation')||'').trim()||null,created_by:currentUser?.id||null,updated_at:new Date().toISOString()};
+    try {
+      let data,error; if(existingId){({data,error}=await supabaseClient.from('audit_exceptions').update(payload).eq('id',existingId).select().single());}else{({data,error}=await supabaseClient.from('audit_exceptions').insert({...payload,id}).select().single());}
+      if(error)throw error;
+      const item={id:data.id,clientId:data.client_id,title:data.title,category:data.category||'',severity:data.severity,status:data.status,impact:data.impact||'',description:data.description||'',recommendation:data.recommendation||'',createdAt:data.created_at,updatedAt:data.updated_at};
+      const idx=localState.exceptions.findIndex(x=>String(x.id)===String(item.id)); if(idx>=0)localState.exceptions[idx]=item;else localState.exceptions.unshift(item); saveLocalState();
+      await upsertAuditTrailRow(idx>=0?'تعديل استثناء':'إنشاء استثناء','exception',item.id,`${item.title} • ${item.severity} • ${item.status}`,clientId);
+      audit(idx>=0?'تعديل استثناء':'إنشاء استثناء','exception',item.id,`${item.title} • ${item.severity} • ${item.status}`,clientId); closeModal(); renderExceptions(); toast('تم الحفظ','تم حفظ الاستثناء ومتابعة حالته.');
+    } catch(error){console.error('SAVE EXCEPTION ERROR',error);showToast('فشل حفظ الاستثناء',error?.message||'تعذر حفظ الاستثناء.');}
   };
 
   window.viewException = function(id){ const e=localState.exceptions.find(x=>String(x.id)===String(id)); if(!e)return; openModal('تفاصيل الاستثناء',`<div class="document-preview"><div class="document-preview-header"><div><div class="document-preview-name">${escapeHTML(e.title)}</div><div class="document-preview-meta">${escapeHTML(clientName(e.clientId))} • ${escapeHTML(e.category)}</div></div>${severityBadge(e.severity)} ${statusBadge(e.status)}</div><div class="info-box">${escapeHTML(e.description)}</div><div class="info-box" style="margin-top:10px">التأثير: ${escapeHTML(e.impact||'غير محدد')}<br>التوصية: ${escapeHTML(e.recommendation||'لا توجد توصية مسجلة.')}</div></div><div class="modal-actions"><button class="btn" onclick="openExceptionModal('${escapeAttribute(e.id)}')">تعديل</button><button class="btn secondary" onclick="closeModal()">إغلاق</button></div>`); lucide.createIcons(); };
 
-  window.deleteException=function(id){const e=localState.exceptions.find(x=>String(x.id)===String(id));if(!e)return;if(!confirm(`حذف الاستثناء "${e.title}"؟`))return;localState.exceptions=localState.exceptions.filter(x=>String(x.id)!==String(id));saveLocalState();audit('حذف استثناء','exception',id,e.title,e.clientId);renderExceptions();toast('تم الحذف','تم حذف الاستثناء.');};
+  window.deleteException=async function(id){const e=localState.exceptions.find(x=>String(x.id)===String(id));if(!e)return;if(!confirm(`حذف الاستثناء "${e.title}"؟`))return;try{const {error}=await supabaseClient.from('audit_exceptions').delete().eq('id',id);if(error)throw error;localState.exceptions=localState.exceptions.filter(x=>String(x.id)!==String(id));saveLocalState();await upsertAuditTrailRow('حذف استثناء','exception',id,e.title,e.clientId);audit('حذف استثناء','exception',id,e.title,e.clientId);renderExceptions();toast('تم الحذف','تم حذف الاستثناء.');}catch(error){console.error('DELETE EXCEPTION ERROR',error);showToast('فشل الحذف',error?.message||'تعذر حذف الاستثناء.');}};
 
   /* =========================
      REPORTS
@@ -9892,6 +9963,13 @@ console.log("FINAL AUDITOR SUPABASE ENHANCEMENTS: installed");
     lucide.createIcons();
   };
   window.clearAuditTrail=function(){if(!confirm('مسح سجل التدقيق المحلي؟'))return;localState.auditTrail=[];saveLocalState();renderAuditTrail();toast('تم المسح','تم مسح السجل المحلي.');};
+
+  const baseCompleteV3 = completeAuditorLogin;
+  completeAuditorLogin = async function(user){
+    const ok = await baseCompleteV3(user);
+    try { await loadWorkflowDataFromSupabase(); } catch(error){ console.error('WORKFLOW DATA LOAD ERROR', error); }
+    return ok;
+  };
 
   /* =========================
      IMPROVED AUTO AUDIT
@@ -10019,10 +10097,20 @@ console.log("FINAL AUDITOR SUPABASE ENHANCEMENTS: installed");
     if (!currentUser?.id) return;
     const { data, error } = await supabaseClient
       .from('audit_reports')
-      .select('id,client_id,title,type,status,summary,delivery_note,file_path,created_by,created_at,updated_at,issued_at,delivered_at')
+      .select('id,client_id,title,report_type,status,summary,content,file_path,file_name,created_by,created_at,updated_at,period,delivered_at')
       .order('created_at', { ascending:false });
     if (error) throw error;
-    localState.reports = data || [];
+    localState.reports = (data || []).map(r => ({
+      ...r,
+      clientId: r.client_id,
+      type: r.report_type || 'نهائي',
+      delivery_note: r.content || '',
+      deliveryNote: r.content || '',
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+      deliveredAt: r.delivered_at,
+      filePath: r.file_path || null
+    }));
     saveLocalState();
   }
 
@@ -10141,7 +10229,17 @@ console.log("FINAL AUDITOR SUPABASE ENHANCEMENTS: installed");
       let filePath = localState.reports.find(r=>String(r.id)===String(existingId))?.file_path || null;
       const file=f.get('report_file');
       if(file instanceof File && file.size>0) filePath=await uploadReportFile(file,clientId,reportId);
-      const payload={client_id:clientId,title,type:String(f.get('type')||'نهائي'),status,summary,delivery_note:String(f.get('delivery_note')||'').trim()||null,file_path:filePath,created_by:currentUser?.id||null,updated_at:new Date().toISOString(),issued_at:status==='issued'?new Date().toISOString():null};
+      const payload={
+        client_id:clientId,
+        title,
+        report_type:String(f.get('type')||'نهائي'),
+        status,
+        summary,
+        content:String(f.get('delivery_note')||'').trim() || null,
+        file_path:filePath,
+        created_by:currentUser?.id||null,
+        updated_at:new Date().toISOString()
+      };
       let data,error;
       if(existingId){
         ({data,error}=await supabaseClient.from('audit_reports').update(payload).eq('id',existingId).select().single());
@@ -10169,7 +10267,7 @@ console.log("FINAL AUDITOR SUPABASE ENHANCEMENTS: installed");
     try{
       let fileUrl=null;
       if(report.file_path) fileUrl=await createReportSignedUrl(report.file_path);
-      const message=`تم إصدار تقرير التدقيق: ${report.title}\n\n${report.summary}\n\n${report.delivery_note||'يمكنك متابعة التقرير من بوابة التدقيق الإلكترونية.'}${fileUrl?`\n\nرابط فتح التقرير (صالح لمدة 30 يومًا):\n${fileUrl}`:''}`;
+      const message=`تم إصدار تقرير التدقيق: ${report.title}\n\n${report.summary}\n\n${report.delivery_note||'تم تسليم التقرير إلى بوابة شركتك. افتح قسم «تقارير فريق التدقيق» لعرض الملف.'}`;
       await invokeService({action:'send_message',clientId:String(report.client_id),message});
       const {data,error}=await supabaseClient.from('audit_reports').update({delivered_at:new Date().toISOString(),status:'issued'}).eq('id',report.id).select().single();
       if(error) throw error;
