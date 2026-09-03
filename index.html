@@ -4540,8 +4540,6 @@ body: {
 email:
 email,
 
-password:
-temporaryPassword,
 
 name:
 name,
@@ -8973,15 +8971,13 @@ button.innerHTML = '<i data-lucide="loader-circle" class="animate-spin"></i> ج�
 lucide.createIcons();
 }
 setSystemStatus(true, "جارٍ إنشاء حساب العميل...");
-const temporaryPassword = typeof generateSecurePassword === "function"
-? generateSecurePassword()
-: Math.random().toString(36).slice(-10) + "A1!";
+const temporaryPassword = null;
 const result = await invokeService({
 action: "create",
 clientData: {
 name,
 email,
-password: temporaryPassword,
+
 tax_number: String(form.get("tax_number") || "").trim() || null,
 activity: String(form.get("activity") || "").trim() || null,
 contact: String(form.get("contact") || "").trim() || null,
@@ -9001,11 +8997,11 @@ openModal(
 <div class="form-grid">
 <div class="form-group full"><label>اسم العميل</label><input value="${escapeAttribute(name)}" disabled></div>
 <div class="form-group full"><label>البريد الإلكتروني</label><input value="${escapeAttribute(email)}" disabled></div>
-<div class="form-group full"><label>كلمة المرور المؤقتة</label><input id="createdClientPassword" value="${escapeAttribute(result.temporaryPassword || temporaryPassword)}" readonly style="letter-spacing:1px;font-weight:700;"></div>
+<div class="form-group full"><label>رمز التفعيل المؤقت</label><input id="createdClientActivationCode" value="${escapeAttribute(result.activationCode || "")}" readonly style="letter-spacing:2px;font-weight:800;"></div>
 </div>
-<div class="danger-box mt-4">احفظي كلمة المرور وأرسليها للعميل عبر وسيلة آمنة. لن يتم تخزينها داخل ملف العميل.</div>
+<div class="danger-box mt-4">أعطي العميل رمز التفعيل عبر وسيلة آمنة. سيستخدمه من «نسيت كلمة المرور؟» ليختار كلمة مروره السرية بنفسه. الرمز صالح لمدة 72 ساعة ويُستخدم مرة واحدة.</div>
 <div class="modal-actions">
-<button class="btn" type="button" onclick="copyCreatedClientPassword()"><i data-lucide="copy"></i>نسخ كلمة المرور</button>
+<button class="btn" type="button" onclick="copyCreatedClientActivationCode()"><i data-lucide="copy"></i>نسخ رمز التفعيل</button>
 <button class="btn secondary" type="button" onclick="closeModal(); navigate('clients')">إنهاء</button>
 </div>
 `
